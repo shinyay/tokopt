@@ -1,0 +1,60 @@
+name: Use case story
+description: Share how you're using `tokopt` — we'd love to feature your story.
+labels:
+  - use-case
+  - documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing! With your permission, we may turn this into a docs page under `docs/use-cases/`.
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: Short title (e.g., 'Audit a 50-skill template repo').
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What's the repo / team / situation?
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What were you trying to figure out?
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands used
+      description: Which `tokopt` commands did you use? (paste them)
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What did you find? Numbers welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: lesson
+    attributes:
+      label: Lessons learned
+      description: Any lessons worth sharing?
+    validations:
+      required: false
+  - type: checkboxes
+    id: permission
+    attributes:
+      label: Publication permission
+      options:
+        - label: I'm happy for this to appear in docs/use-cases/ (with attribution if I'd like)
+          required: true

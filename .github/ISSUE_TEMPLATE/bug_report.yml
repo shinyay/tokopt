@@ -1,0 +1,85 @@
+name: Bug report
+description: Report a bug in the tokopt binary, install script, or example files.
+labels:
+  - bug
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time! Before submitting, run `tokopt --version` and have the output ready.
+  - type: input
+    id: version
+    attributes:
+      label: tokopt version
+      description: Output of `tokopt --version`.
+      placeholder: e.g., tokopt 0.3.1
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      description: Which OS are you running tokopt on?
+      options:
+        - linux
+        - macOS
+        - windows
+        - other
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: Architecture
+      description: CPU architecture of the machine running tokopt.
+      options:
+        - amd64
+        - arm64
+        - other
+    validations:
+      required: true
+  - type: input
+    id: install_method
+    attributes:
+      label: Install method
+      description: How did you install? (install.sh, manual download, built from source...)
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce — include the exact command and any input files.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What actually happened. Include full output.
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else? Logs, screenshots, related issues.
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I have searched existing issues
+          required: true
+        - label: I have read the troubleshooting guide
+          required: true

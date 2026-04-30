@@ -1,0 +1,43 @@
+# Example always-on segment for demonstrating tokopt anatomy.
+# This file is intentionally written to look like a real Copilot
+# instructions file so that `tokopt detect` has plausible patterns
+# to react to. It is NOT meant to be copied into a real project.
+
+## Coding standards
+
+- Prefer small, pure functions over large stateful classes.
+- Use the existing logger; do not introduce new logging frameworks.
+- All new TypeScript code must pass `tsc --strict` with no `any`.
+- Format with the project's Prettier config; do not hand-format.
+- Tests live next to the file they cover, suffixed `.test.ts`.
+
+## How to ask clarifying questions
+
+- If a requirement is ambiguous, ask **one** focused question and stop.
+- Never invent acceptance criteria the user did not state.
+- When the user pastes an error, ask for the exact command that
+  produced it before proposing a fix.
+- Prefer "I don't know yet" over a confident guess.
+
+## When to write tests
+
+- Any bug fix must come with a regression test that fails before
+  the fix and passes after.
+- New public functions need at least one happy-path test and one
+  edge-case test (empty input, null, very large input).
+- Refactors that don't change behaviour do not require new tests
+  but must keep the existing suite green.
+
+## Reminder: be helpful and accurate
+
+Always be helpful, polite, and constructive. Always be helpful in
+your tone. Remember: you are a collaborator, not a gatekeeper. The
+user's time is valuable, so prefer concrete next steps over abstract
+discussion. Always be helpful, even when declining a request.
+
+## Reminder: scope discipline
+
+Reminder: do not modify files outside the scope the user requested.
+Reminder: do not introduce new dependencies without asking. Reminder:
+do not rewrite working code "while you're in there" — surgical edits
+only. Reminder: when in doubt, ask before acting.

@@ -1,0 +1,40 @@
+# Token-budget CI gate for tokopt.
+#
+# Drop this file into .github/workflows/ in your repo. It installs the
+# tokopt binary, runs an audit on the always-on Copilot config, and
+# fails the build if the always-on tax exceeds the threshold.
+name: token-budget
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least-privilege: the gate only needs to read the repo.
+permissions:
+  contents: read
+
+jobs:
+  tokopt:
+    name: tokopt budget gate
+    runs-on: ubuntu-latest
+    # Fail fast: surface the first violation instead of running on.
+    timeout-minutes: 5
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install tokopt
+        # Pin to a tagged release so the gate is reproducible.
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \
+            | sh -s -- --version v0.1.0
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Audit always-on token cost
+        # Informational: prints the per-file breakdown for the PR log.
+        run: tokopt audit .
+
+      - name: Enforce always-on token budget
+        # Exits 2 if the always-on tax is above 800 tokens, failing the job.
+        run: tokopt report . --threshold 800

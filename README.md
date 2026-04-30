@@ -1,376 +1,215 @@
-# Project Title
+# tokopt
 
-<!-- TEMPLATE: Replace with your project name. Keep it concise. -->
+> **Measure your LLM token bill before it measures you.**
 
-> **One compelling sentence that makes the reader want to keep scrolling.**
+[![Latest release](https://img.shields.io/github/v/release/shinyay/tokopt?label=release&color=blue)](https://github.com/shinyay/tokopt/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Platforms](https://img.shields.io/badge/platforms-linux%20%C2%B7%20macOS%20%C2%B7%20windows-lightgrey)](docs/installation.md)
+[![Quick start](https://img.shields.io/badge/docs-quick%20start-brightgreen)](docs/quickstart.md)
 
-<!-- TEMPLATE: Write a tagline that captures the VALUE of this project.
-     Examples from real repos:
-     - "Stop vibe coding. Start specifying."
-     - "Local Markdown archive of GitHub Changelog with AI-generated deep-dive analysis"
-     Ask yourself: if someone reads ONLY this line, do they understand why this project exists?
--->
+`tokopt` is a small Go CLI that **measures** the token cost of a Copilot/agent
+repository and reports it honestly. It scans your real configuration, decomposes
+real prompts into their seven canonical segments, runs anti-pattern detectors
+against real files, and analyses usage logs for the heavy tail. Output is in
+**tokens** — never dollars — because pricing changes too fast and the honest
+unit for design is the token.
 
-<!-- TEMPLATE: Pick the badges relevant to your project. Delete the rest. -->
+It is built for engineers and platform teams who own a Copilot/agent template
+repo and want a number, not an opinion. Every finding is labelled **measured**
+or **heuristic** so you always know which numbers came from a tokenizer and
+which came from pattern-matching. You can reach the same audit in three ways:
+from the integrated **terminal**, from one-click **VS Code Tasks**, or from
+natural-language **Copilot Chat** via the companion skills + `token-doctor`
+agent. Pick whichever surface fits the moment — they all call the same binary.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/shinyay/REPO_NAME)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://gist.githubusercontent.com/shinyay/56e54ee4c0e22db8211e05e70a63247e/raw/f3ac65a05ed8c8ea70b653875ccac0c6dbc10ba1/LICENSE)
+## 📦 Install in one line
 
-<!-- TEMPLATE: Add any of these as needed:
-[![CI](https://github.com/shinyay/REPO_NAME/actions/workflows/ci.yml/badge.svg)](https://github.com/shinyay/REPO_NAME/actions/workflows/ci.yml)
-[![GitHub release](https://img.shields.io/github/v/release/shinyay/REPO_NAME)](https://github.com/shinyay/REPO_NAME/releases)
--->
+**bash / zsh:**
 
-A 1–2 sentence **elevator pitch**: what this project IS, who it's FOR, and why it MATTERS. Include a key metric if possible (e.g., "18 scenarios", "8-level curriculum", "5-layer pipeline").
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh
+```
 
-<!-- TEMPLATE: The elevator pitch should answer three questions in ≤2 sentences:
-     1. WHAT is this? (tool / workshop / library / pipeline / template)
-     2. WHO is this for? (developers / DevOps / learners / teams)
-     3. WHY should they care? (saves time / teaches skills / automates X)
--->
+**fish:**
 
-> [!NOTE]
-> **Status/Version disclaimer** — e.g., "This project is built against v1.2.3 as of 2026-02-21. APIs may change."
+```fish
+sh -c 'curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh'
+```
 
-<!-- TEMPLATE: DELETE this alert if your project is stable. Keep it for preview/evolving tools.
-     GitHub supports these alert types — use sparingly (max 2-3 per README):
-     > [!NOTE]      — Useful information the reader should know
-     > [!TIP]       — Helpful advice to save time or prevent mistakes
-     > [!IMPORTANT] — Key information the reader must not miss
-     > [!WARNING]   — Urgent attention needed to avoid problems
-     > [!CAUTION]   — Potential risks or irreversible actions
--->
+**Pin to a specific version:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh -s -- --version v0.1.0
+```
+
+The installer detects your OS/architecture, downloads the matching binary from
+the latest GitHub Release, and drops it on your `PATH`. Manual download,
+checksum verification, custom prefix, Windows instructions, and uninstall are
+all covered in [docs/installation.md](docs/installation.md).
+
+## ⚡ 30-second demo
+
+```bash
+# 1. Audit any repo for its always-on / conditional / on-demand token tax.
+$ tokopt audit .
+tokopt audit  root=.  encoding=o200k_base
+always-on tax: 103 tokens
+conditional:   464 tokens (paid only when triggered: applyTo, agent step, agent invoked)
+on-demand:     2701 tokens (skills loaded only when matched)
+
+TOKENS  BYTES  SCOPE        CATEGORY              PATH                              NOTE
+103     428    always-on    copilot-instructions  .github/copilot-instructions.md   
+464     1974   conditional  agent-definition      agents/token-doctor.agent.md      agent definition; cost paid only when agent is invoked
+669     2713   on-demand    skill-definition      skills/antipattern-scan/SKILL.md  skill is loaded on demand by description match
+...
+
+# 2. Decompose a hypothetical prompt into the seven canonical segments.
+$ tokopt anatomy --always-on examples/always-on.txt --user examples/user-message.txt
+tokopt anatomy  encoding=o200k_base  total input=481 tokens
+
+SEGMENT    TOKENS  BYTES  % OF INPUT
+system     0       0      0.0%
+always-on  407     1865   84.6%
+tools      0       0      0.0%
+history    0       0      0.0%
+retrieved  0       0      0.0%
+user       74      341    15.4%
+reasoning  0       0      0.0%
+
+# 3. Flag anti-patterns in the static config.
+$ tokopt detect .
+tokopt detect: no anti-patterns found
+```
+
+That's it — three commands, no API keys, no telemetry, no network calls. The
+tokenizer is local (`tiktoken-go`, `o200k_base` by default).
+
+> **What the labels mean.** `always-on` is paid on every call (top-level
+> instructions). `conditional` is paid only when triggered (agent steps,
+> `applyTo`-scoped instructions). `on-demand` is paid only when matched
+> (skills loaded by description). The audit reports all three so you can
+> tell which knob to turn.
+
+## 📦 What's in the box
+
+Six commands cover the audit → diagnose → recommend loop. Each links to its
+own reference doc.
+
+| Command | Purpose | Doc |
+| --- | --- | --- |
+| `audit` | Repo-wide always-on / conditional / on-demand token tax. | [docs/commands/audit.md](docs/commands/audit.md) |
+| `anatomy` | Decompose a prompt into the seven canonical segments. | [docs/commands/anatomy.md](docs/commands/anatomy.md) |
+| `detect` | Run anti-pattern detectors against static config. | [docs/commands/detect.md](docs/commands/detect.md) |
+| `tail` | p50 / p90 / p95 / p99 / max + outliers from a JSONL or CSV usage log. | [docs/commands/tail.md](docs/commands/tail.md) |
+| `report` | Combined audit + detect dashboard with ranked recommendations. CI-friendly via `--threshold`. | [docs/commands/report.md](docs/commands/report.md) |
+| `count` | Token count for any file. Use `-` for stdin. | [docs/commands/count.md](docs/commands/count.md) |
+
+Global flags: `--encoding {o200k_base,cl100k_base}`, `--format {text,json,md}`,
+`--reference-window N` (opt-in only — no default model size is implied). See
+[docs/reference/cli-reference.md](docs/reference/cli-reference.md).
+
+## 🧭 Three ways to use it
+
+| Layer | Surface | When you want it |
+| --- | --- | --- |
+| **1 · Terminal** | `tokopt` on your shell | Scripted runs, CI gates, ad-hoc audits — see [docs/quickstart.md](docs/quickstart.md). |
+| **2 · VS Code Tasks** | One-click runs from the command palette | Repeated audits during a refactor — see [docs/integrations/vscode-tasks.md](docs/integrations/vscode-tasks.md). |
+| **3 · Copilot Chat** | `@token-doctor` agent + 5 skills | Natural-language audits ("why is my always-on tax so high?") — see [docs/integrations/copilot-skills-and-agent.md](docs/integrations/copilot-skills-and-agent.md). |
+
+All three call the same binary and produce the same numbers. The skills + agent
+just translate the output into prose and refuse to invent counts the CLI did
+not measure.
+
+## 🚫 What it does *not* do
+
+- **No dollar amounts.** Pricing changes too fast; design with tokens, not
+  currency. Use your provider's bill for billing.
+- **No baked-in context window.** The percentage-of-window display is opt-in
+  via `--reference-window N`. The tool refuses to imply a model size.
+- **No cross-provider billing accuracy.** The tokenizer is `tiktoken-go`. For
+  non-OpenAI model families it's a *local approximation* — useful for relative
+  comparisons and before/after diffs, never as a billing oracle.
+- **No telemetry, no network calls.** Everything runs locally against the
+  files in your repo.
+
+## 📚 Documentation map
+
+The canonical entry point is **[docs/index.md](docs/index.md)** — a Diátaxis-organised
+hub linking every doc below.
+
+### 🚀 Get started
+- [docs/quickstart.md](docs/quickstart.md) — zero to first audit in 5 minutes.
+- [docs/installation.md](docs/installation.md) — install script, manual download, Windows, uninstall.
+
+### 📖 Concepts
+- [docs/what-is-tokopt.md](docs/what-is-tokopt.md) — one-pager: what it is, what it isn't.
+- [docs/motivation.md](docs/motivation.md) — why measurement-driven, not prescriptive.
+- [docs/concepts/always-on-tax.md](docs/concepts/always-on-tax.md) — what the audit is actually counting.
+- [docs/concepts/three-layer-model.md](docs/concepts/three-layer-model.md) — always-on / conditional / on-demand.
+- [docs/commands/anatomy.md](docs/commands/anatomy.md) — the seven canonical prompt segments.
+- [docs/concepts/token-vocabulary.md](docs/concepts/token-vocabulary.md) — tokens, tokenizers, encodings.
+
+### 📋 Commands & reference
+- [docs/commands/](docs/commands/) — one page per command: `audit`, `anatomy`, `detect`, `tail`, `report`, `count`.
+- [docs/reference/cli-reference.md](docs/reference/cli-reference.md) — `--encoding`, `--format`, `--reference-window`, full flag matrix.
+- [docs/reference/exit-codes.md](docs/reference/exit-codes.md) — `0` = ok, `1` = error, `2` = budget exceeded.
+- [docs/reference/output-formats.md](docs/reference/output-formats.md) — `text`, `json`, `md` schemas.
+
+### 🛠 How-to
+- [docs/use-cases/auditing-a-template-repo.md](docs/use-cases/auditing-a-template-repo.md)
+- [docs/use-cases/ci-budget-gating.md](docs/use-cases/ci-budget-gating.md)
+- [docs/use-cases/pr-review-with-tokopt.md](docs/use-cases/pr-review-with-tokopt.md)
+- [docs/use-cases/prompt-anatomy-investigation.md](docs/use-cases/prompt-anatomy-investigation.md)
+- [docs/use-cases/monitoring-token-spend.md](docs/use-cases/monitoring-token-spend.md)
+- [docs/integrations/vscode-tasks.md](docs/integrations/vscode-tasks.md)
+- [docs/integrations/copilot-skills-and-agent.md](docs/integrations/copilot-skills-and-agent.md)
+- [docs/integrations/github-actions.md](docs/integrations/github-actions.md)
+
+### 🔭 Project
+- [docs/roadmap.md](docs/roadmap.md)
+- [docs/faq.md](docs/faq.md)
+- [docs/troubleshooting.md](docs/troubleshooting.md)
+- [docs/glossary.md](docs/glossary.md)
+
+### 🤝 Community
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- [SECURITY.md](SECURITY.md)
+
+## 🚦 CI integration
+
+Use `tokopt report --threshold N` to fail a build when the always-on tax grows
+past your budget:
+
+```yaml
+- name: Token budget
+  run: tokopt report --threshold 1500 .
+```
+
+Exit code `0` if the always-on tax stays under budget, `2` if exceeded, `1` for
+runtime errors. The gate is on **always-on only** — conditional and on-demand
+totals are reported but never gated by `--threshold`, because they are not paid
+on every call. Full recipe: [docs/integrations/github-actions.md](docs/integrations/github-actions.md).
+
+## 🎯 Why measurement-driven?
+
+Most token-optimization advice is prescriptive prose: "cut prompts by 40%",
+"trim your tools", "summarise your history". Useful — but the reader is left
+guessing whether it applies to *their* repo and whether their fix actually
+moved the needle. `tokopt` closes that gap by pairing every recommendation
+with a measured token count, or labelling it **heuristic** when impact can
+only be inferred from static config. Read the long version in
+[docs/motivation.md](docs/motivation.md).
+
+## 🔭 Roadmap
+
+`v0.1` ships the audit / anatomy / detect / tail / report / count loop;
+upcoming work is tracked in [docs/roadmap.md](docs/roadmap.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
 
 ---
 
-## 🚀 Quick Start
-
-<!-- TEMPLATE: This is the MOST IMPORTANT section. Get the reader to "it works!" in the fewest steps. -->
-
-**Prerequisites:**
-
-- [ ] Prerequisite 1 — e.g., **Node.js 18+** (`node --version`)
-- [ ] Prerequisite 2 — e.g., **GitHub account** with [Copilot](https://github.com/features/copilot) access
-- [ ] Prerequisite 3 — e.g., **Git** (`git --version`)
-
-<!-- TEMPLATE: Use checkboxes for prerequisites. Include the verification command in parentheses. -->
-
-### 1. Set up the environment
-
-<!-- TEMPLATE: Replace with your actual setup steps. If you have a Codespaces badge, mention "click the badge above". -->
-
-```bash
-git clone https://github.com/shinyay/REPO_NAME.git
-cd REPO_NAME
-```
-
-<details>
-<summary>Alternative: VS Code + Dev Containers (local)</summary>
-
-1. Install [Docker](https://www.docker.com/products/docker-desktop) and the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-2. Clone this repository
-3. Open in VS Code → click **"Reopen in Container"** when prompted
-
-</details>
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Run and verify
-
-```bash
-npm start
-```
-
-If you see `✓ Server running on port 3000` — your setup works! You're ready to go.
-
-<!-- TEMPLATE: ALWAYS include a verification step. The reader needs to know "it worked".
-     Examples: "If you see Response: 4", "Open http://localhost:3000", "All tests should pass" -->
-
----
-
-## 💡 Overview
-
-<!-- TEMPLATE: Explain the WHY — what problem does this solve? How does it work conceptually?
-     This is where you differentiate from other projects. -->
-
-### What problem does this solve?
-
-Describe the pain point in 2–3 sentences. What was the user doing before this project existed?
-
-### How does it work?
-
-<!-- TEMPLATE: Include an ASCII diagram if your project has multiple components.
-     ASCII diagrams > paragraphs of explanation. -->
-
-```
-Component A → Component B → Component C
-     ↓              ↓
-  Storage        Output
-```
-
-<!-- TEMPLATE: Replace with your actual architecture. Examples:
-     "Your App → SDK Client → (JSON-RPC) → Copilot CLI → LLM API"
-     "Fetch → Analyze → Translate → Present → Validate"
--->
-
----
-
-## ✨ Features
-
-<!-- TEMPLATE: Choose ONE format below and delete the other.
-     Use the TABLE format for 4+ features with descriptions.
-     Use the LIST format for simple feature enumeration. -->
-
-<!-- FORMAT A: Rich table (recommended for 4+ features) -->
-
-| Feature | Description |
-|---------|-------------|
-| **Feature 1** | What it does and why it matters |
-| **Feature 2** | What it does and why it matters |
-| **Feature 3** | What it does and why it matters |
-| **Feature 4** | What it does and why it matters |
-
-<!-- FORMAT B: Bullet list (for simpler projects)
-- **Feature 1** — Brief description
-- **Feature 2** — Brief description
-- **Feature 3** — Brief description
--->
-
----
-
-## 🏗️ Architecture
-
-<!-- TEMPLATE: DELETE this section if your project is simple (single script, small library).
-     KEEP it if your project has multiple components, layers, or services. -->
-
-### Project Structure
-
-```
-project-root/
-├── src/                # Source code
-│   ├── main.ts         # Entry point
-│   └── utils/          # Shared utilities
-├── tests/              # Test suite
-├── docs/               # Documentation
-├── .github/            # GitHub configuration
-│   ├── workflows/      # CI/CD pipelines
-│   └── copilot-instructions.md
-├── package.json
-└── README.md
-```
-
-<!-- TEMPLATE: Replace with your actual directory tree.
-     Only show important directories/files — not every file. -->
-
----
-
-## 📖 Usage
-
-<!-- TEMPLATE: Show how to use the project AFTER setup. Include the "I want to…" table
-     for projects with multiple use cases. Delete if your project has a single workflow. -->
-
-### Quick Reference: "I want to…"
-
-| I want to… | Do this |
-|------------|---------|
-| Run the dev server | `npm run dev` |
-| Run all tests | `npm test` |
-| Build for production | `npm run build` |
-| Add a new feature | See [Contributing](#-contributing) |
-
-<!-- TEMPLATE: This "I want to…" pattern is the most user-friendly navigation.
-     Replace with your project's actual tasks. -->
-
-### Example
-
-```bash
-# Example command or code snippet showing typical usage
-```
-
-<!-- TEMPLATE: Show a REAL example, not pseudocode. The reader should be able to
-     copy-paste and run this immediately after Quick Start. -->
-
-> [!TIP]
-> Pro tip or important usage note that saves time or prevents common mistakes.
-
-<!-- TEMPLATE: DELETE this tip if you don't have one. Don't add filler tips. -->
-
----
-
-## 📦 Installation
-
-<!-- TEMPLATE: DELETE this section if Quick Start already covers installation.
-     KEEP it if you support multiple installation methods (npm, brew, curl, etc.). -->
-
-### npm
-
-```bash
-npm install -g your-package
-```
-
-### Homebrew (macOS / Linux)
-
-```bash
-brew install your-package
-```
-
-<details>
-<summary>Other installation methods</summary>
-
-### curl (Install Script)
-
-```bash
-curl -fsSL https://example.com/install | bash
-```
-
-### From Source
-
-```bash
-git clone https://github.com/shinyay/REPO_NAME.git
-cd REPO_NAME
-npm install && npm run build
-```
-
-</details>
-
----
-
-## 🛠️ Development
-
-<!-- TEMPLATE: DELETE this section for non-code projects (workshops, documentation repos).
-     KEEP it for libraries, tools, and applications. -->
-
-### Local Setup
-
-```bash
-git clone https://github.com/shinyay/REPO_NAME.git
-cd REPO_NAME
-npm install
-```
-
-### Running Tests
-
-```bash
-npm test
-```
-
-### Linting
-
-```bash
-npm run lint
-```
-
----
-
-## 🌐 Access Points
-
-<!-- TEMPLATE: DELETE this section if your project doesn't expose web services.
-     KEEP for projects with web UIs, APIs, admin panels, databases, etc. -->
-
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| **Application** | http://localhost:PORT/ | — |
-| **Admin Panel** | http://localhost:PORT/ | user / pass |
-| **API Docs** | http://localhost:PORT/docs | — |
-
-<!-- TEMPLATE: Include database connection details if applicable:
-     ```properties
-     Host: localhost
-     Port: 5432
-     Database: mydb
-     User: myuser
-     Password: mypass
-     ```
--->
-
----
-
-## 🔧 Troubleshooting
-
-<!-- TEMPLATE: DELETE this section if your project is simple (single script, small library).
-     KEEP for projects with environment dependencies, Docker, external services, etc. -->
-
-<details>
-<summary><b>Common Issues & Solutions</b></summary>
-
-### Issue Category 1
-
-**Symptom description:**
-```bash
-# Diagnostic command to identify the problem
-```
-
-**Solution:**
-```bash
-# Fix command
-```
-
-### Issue Category 2
-
-**Symptom description:**
-```bash
-# Diagnostic command
-```
-
-**Solution:**
-```bash
-# Fix command
-```
-
-<!-- TEMPLATE: Use <details> for long dependency lists, detailed configs,
-     or verbose troubleshooting that would clutter the main flow.
-     Group issues by category (Build, Deployment, Environment, etc.). -->
-
-</details>
-
----
-
-## 📚 References
-
-<!-- TEMPLATE: Use a table for 3+ links. Use a bullet list for fewer. -->
-
-| Resource | Link |
-|----------|------|
-| Official Documentation | [docs.example.com](https://docs.example.com) |
-| API Reference | [api.example.com](https://api.example.com) |
-| Related Project | [github.com/org/project](https://github.com/org/project) |
-
----
-
-## 🤝 Contributing
-
-Found a bug? Have an idea? [Open an issue](https://github.com/shinyay/REPO_NAME/issues/new) — contributions and suggestions are welcome.
-
-<!-- TEMPLATE: For larger projects, link to a CONTRIBUTING.md instead:
-     See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
--->
-
----
-
-## ⭐ Support
-
-<!-- TEMPLATE: DELETE if you don't want a CTA section. Useful for open-source projects
-     seeking community engagement. -->
-
-If this project helps you, please consider:
-- ⭐ Starring this repository
-- 🐛 [Reporting issues](https://github.com/shinyay/REPO_NAME/issues/new)
-- 📢 Sharing with others
-
----
-
-## Licence
-
-Released under the [MIT license](https://gist.githubusercontent.com/shinyay/56e54ee4c0e22db8211e05e70a63247e/raw/f3ac65a05ed8c8ea70b653875ccac0c6dbc10ba1/LICENSE)
-
-## Author
-
-- github: <https://github.com/shinyay>
-- bluesky: <https://bsky.app/profile/yanashin.bsky.social>
-- twitter: <https://twitter.com/yanashin18618>
-- mastodon: <https://mastodon.social/@yanashin>
-- linkedin: <https://www.linkedin.com/in/yanashin/>
+Built by [@shinyay](https://github.com/shinyay) with the help of GitHub Copilot.

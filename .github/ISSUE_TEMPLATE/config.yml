@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/shinyay/tokopt#documentation
+    about: Read the docs first — quickstart, FAQ, and troubleshooting cover most questions.
+  - name: 💬 Discussions
+    url: https://github.com/shinyay/tokopt/discussions
+    about: Share ideas, ask open-ended questions, or chat with other users.

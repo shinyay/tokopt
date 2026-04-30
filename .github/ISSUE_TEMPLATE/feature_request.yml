@@ -1,0 +1,51 @@
+name: Feature request
+description: Suggest a new command, flag, output format, or integration.
+labels:
+  - enhancement
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! Please skim [`docs/roadmap.md`](../blob/main/docs/roadmap.md) first — your idea may already be on the roadmap (or explicitly out of scope).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: "What problem are you trying to solve? (Not: 'I want feature X' — instead: 'I'm trying to do Y and currently it requires Z workaround')"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: If you have a concrete proposal, describe it here.
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives / workarounds
+      description: What workarounds are you using today?
+    validations:
+      required: false
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope of change
+      description: What kind of change is this?
+      options:
+        - New command
+        - New flag on existing command
+        - New output format
+        - New integration
+        - Behavioural change
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      validations:
+        required: false

@@ -1,0 +1,5 @@
+Please add input validation to the `parseConfig` function in src/config.ts.
+Make sure null, undefined, and empty-string inputs return a clear error
+(something like `ConfigError: input is empty`) rather than crashing with
+a `TypeError: Cannot read properties of null`. Add a regression test in
+src/config.test.ts that covers all three cases.

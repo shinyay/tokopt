@@ -1,0 +1,57 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "tokopt: audit current repo",
+      "type": "shell",
+      "command": "tokopt",
+      "args": ["audit", "${workspaceFolder}"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "tokopt: detect anti-patterns",
+      "type": "shell",
+      "command": "tokopt",
+      "args": ["detect", "${workspaceFolder}"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "tokopt: report (CI gate)",
+      "type": "shell",
+      "command": "tokopt",
+      "args": ["report", "${workspaceFolder}", "--threshold", "800"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "tokopt: anatomy of selection",
+      "type": "shell",
+      "command": "tokopt",
+      "args": [
+        "anatomy",
+        "--always-on", "${workspaceFolder}/.github/copilot-instructions.md",
+        "--user", "${file}"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    }
+  ]
+}
