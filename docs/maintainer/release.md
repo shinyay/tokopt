@@ -31,7 +31,7 @@ assumed.
 
 ## Release lifecycle
 
-```
+```text
 Source repo                              Binary repo (this)
 (getting-started-…)                      (tokopt)
 -------------------                      ------------------
@@ -200,8 +200,7 @@ sha256sum tokopt-v${VERSION}-* > SHA256SUMS
 sha256sum -c SHA256SUMS
 ```
 
-The format must match the existing
-[`dist/SHA256SUMS`](../../dist/SHA256SUMS): one line per asset,
+The format must match the existing `dist/SHA256SUMS`: one line per asset,
 `<sha256>  <filename>`, no leading `*` (binary mode marker), one blank-free
 line per entry. `install.sh` parses this with
 `grep -E "[[:space:]]\*?<asset>$"` so either the GNU two-space form or the
