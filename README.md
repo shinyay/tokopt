@@ -138,10 +138,12 @@ The canonical entry point is **[docs/index.md](docs/index.md)** — a Diátaxis-
 hub linking every doc below.
 
 ### 🚀 Get started
+
 - [docs/quickstart.md](docs/quickstart.md) — zero to first audit in 5 minutes.
 - [docs/installation.md](docs/installation.md) — install script, manual download, Windows, uninstall.
 
 ### 📖 Concepts
+
 - [docs/what-is-tokopt.md](docs/what-is-tokopt.md) — one-pager: what it is, what it isn't.
 - [docs/motivation.md](docs/motivation.md) — why measurement-driven, not prescriptive.
 - [docs/concepts/always-on-tax.md](docs/concepts/always-on-tax.md) — what the audit is actually counting.
@@ -150,12 +152,14 @@ hub linking every doc below.
 - [docs/concepts/token-vocabulary.md](docs/concepts/token-vocabulary.md) — tokens, tokenizers, encodings.
 
 ### 📋 Commands & reference
+
 - [docs/commands/](docs/commands/) — one page per command: `audit`, `anatomy`, `detect`, `tail`, `report`, `count`.
 - [docs/reference/cli-reference.md](docs/reference/cli-reference.md) — `--encoding`, `--format`, `--reference-window`, full flag matrix.
 - [docs/reference/exit-codes.md](docs/reference/exit-codes.md) — `0` = ok, `1` = error, `2` = budget exceeded.
 - [docs/reference/output-formats.md](docs/reference/output-formats.md) — `text`, `json`, `md` schemas.
 
 ### 🛠 How-to
+
 - [docs/use-cases/auditing-a-template-repo.md](docs/use-cases/auditing-a-template-repo.md)
 - [docs/use-cases/ci-budget-gating.md](docs/use-cases/ci-budget-gating.md)
 - [docs/use-cases/pr-review-with-tokopt.md](docs/use-cases/pr-review-with-tokopt.md)
@@ -166,12 +170,14 @@ hub linking every doc below.
 - [docs/integrations/github-actions.md](docs/integrations/github-actions.md)
 
 ### 🔭 Project
+
 - [docs/roadmap.md](docs/roadmap.md)
 - [docs/faq.md](docs/faq.md)
 - [docs/troubleshooting.md](docs/troubleshooting.md)
 - [docs/glossary.md](docs/glossary.md)
 
 ### 🤝 Community
+
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - [SECURITY.md](SECURITY.md)

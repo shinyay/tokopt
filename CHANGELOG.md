@@ -15,7 +15,7 @@ under each release's _Source release notes_ section.
 
 ## [Unreleased]
 
-_(empty)_
+<!-- empty -->
 
 ## [0.4.0] — 2026-05-30
 

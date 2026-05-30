@@ -36,7 +36,7 @@ in the source repo.
 - **`detect [path]`** — runs anti-pattern detectors against the
   static config and flags suspected token waste.
 - **`tail`** — heavy-tail percentile analysis (p50/p90/p95/p99/max
-  + top-N outliers) over a usage log, JSONL or CSV.
+  plus top-N outliers) over a usage log, JSONL or CSV.
 - **`report [path]`** — combined audit + detect dashboard with
   ranked recommendations; with `--threshold N`, exits code 2 if
   the always-on tax exceeds `N` (the CI gate).
@@ -99,7 +99,7 @@ single most important idea in the tool, so it gets its own page —
 [concepts/three-layer-model.md](concepts/three-layer-model.md) — but
 here's the elevator version:
 
-```
+```text
    ┌──────────────────────────────────────────────────────┐
    │  Layer 3 — On-demand     (loaded only when invoked)  │
    │     skills, retrieval                                │

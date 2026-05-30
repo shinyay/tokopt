@@ -90,7 +90,7 @@ install guide:
 VS Code caches the skill index at startup. Newly copied files won't
 appear until you reload:
 
-```
+```text
 Ctrl+Shift+P  →  Developer: Reload Window
 ```
 
@@ -99,7 +99,7 @@ Ctrl+Shift+P  →  Developer: Reload Window
 In Copilot Chat, type `#` — the five skill names should auto-complete.
 Or ask Copilot directly:
 
-```
+```text
 Which skills do you have available right now?
 ```
 
