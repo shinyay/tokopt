@@ -18,9 +18,12 @@ It is built for engineers and platform teams who own a Copilot/agent template
 repo and want a number, not an opinion. Every finding is labelled **measured**
 or **heuristic** so you always know which numbers came from a tokenizer and
 which came from pattern-matching. You can reach the same audit in three ways:
-from the integrated **terminal**, from one-click **VS Code Tasks**, or from
-natural-language **Copilot Chat** via the companion skills + `token-doctor`
-agent. Pick whichever surface fits the moment — they all call the same binary.
+from the integrated **terminal**, from one-click VS Code Tasks
+([`tokopt-vscode`](https://github.com/shinyay/tokopt-vscode) — VS Code Copilot
+Chat extension with 5 surfaces), or from natural-language Copilot Chat via
+the companion **9 skills + 2 agents** distributed as
+[`tokopt-skills`](https://github.com/shinyay/tokopt-skills) (Copilot CLI plugin).
+Pick whichever surface fits the moment — they all call the same binary.
 
 ## 📦 Install in one line
 
@@ -113,8 +116,8 @@ Global flags: `--encoding {o200k_base,cl100k_base}`, `--format {text,json,md}`,
 | Layer | Surface | When you want it |
 | --- | --- | --- |
 | **1 · Terminal** | `tokopt` on your shell | Scripted runs, CI gates, ad-hoc audits — see [docs/quickstart.md](docs/quickstart.md). |
-| **2 · VS Code Tasks** | One-click runs from the command palette | Repeated audits during a refactor — see [docs/integrations/vscode-tasks.md](docs/integrations/vscode-tasks.md). |
-| **3 · Copilot Chat** | `@token-doctor` agent + 5 skills | Natural-language audits ("why is my always-on tax so high?") — see [docs/integrations/copilot-skills-and-agent.md](docs/integrations/copilot-skills-and-agent.md). |
+| **2 · VS Code Tasks / Copilot Chat** | One-click runs + CodeLens + Diagnostics + 4 slash prompts | Repeated audits during a refactor — install the [`tokopt-vscode`](https://github.com/shinyay/tokopt-vscode) extension (5 surfaces: CodeLens / Diagnostics / Quick Fix / Status bar / TreeView), or copy task snippets from [docs/integrations/vscode-tasks.md](docs/integrations/vscode-tasks.md). |
+| **3 · Copilot CLI Chat** | `@token-doctor` + `@prompt-optimizer` agents + 9 skills | Natural-language audits ("why is my always-on tax so high?") — install the [`tokopt-skills`](https://github.com/shinyay/tokopt-skills) plugin via `copilot plugin install shinyay/tokopt-skills`, or see [docs/integrations/copilot-skills-and-agent.md](docs/integrations/copilot-skills-and-agent.md). |
 
 All three call the same binary and produce the same numbers. The skills + agent
 just translate the output into prose and refuse to invent counts the CLI did
@@ -211,6 +214,26 @@ only be inferred from static config. Read the long version in
 
 `v0.1` ships the audit / anatomy / detect / tail / report / count loop;
 upcoming work is tracked in [docs/roadmap.md](docs/roadmap.md).
+
+## 🧭 Related repositories — the `tokopt` family
+
+`tokopt` (this repo) is the **binary distribution endpoint** for the CLI.
+The actual Go source lives upstream in the educational repo, and two
+purpose-built distributions wrap the same binary for Copilot Chat surfaces:
+
+| Repo | Role | Install / consume |
+|---|---|---|
+| **[`shinyay/getting-started-with-token-optimization`](https://github.com/shinyay/getting-started-with-token-optimization)** | 🎓 **Source of truth** — 16-chapter textbook + the `tokopt` Go source (`tools/tokopt/`) + canonical `.github/skills/` + `.github/agents/`. CI lives here too. | Read `docs/index.md`; contribute Go / skill / doc changes here. |
+| **[`shinyay/tokopt`](https://github.com/shinyay/tokopt)** *(you are here)* | 📦 Pre-built binary releases for Linux / macOS / Windows + `install.sh`. No source. | `curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \| sh` |
+| **[`shinyay/tokopt-skills`](https://github.com/shinyay/tokopt-skills)** | 🧠 **Copilot CLI plugin** — 9 skills + 2 agents bundled for `gh copilot`. Surface: terminal Copilot Chat (`copilot`). | `copilot plugin install shinyay/tokopt-skills` |
+| **[`shinyay/tokopt-vscode`](https://github.com/shinyay/tokopt-vscode)** | 💻 **VS Code extension** — same 9 skills + 2 agents + 4 slash prompts (`/token-audit`, `/slim-suggest`, `/slim-apply`, `/prompt-anatomy`) + 5 surfaces (CodeLens / Diagnostics / Quick Fix / Status bar / TreeView). Consumes `format_version: "v1"` envelopes from this binary. | Marketplace `.vsix`; or `scripts/install-{workspace,user}.sh`. |
+
+All three downstream consumers call the **same** `tokopt` binary, so any
+number you see in Copilot Chat (CLI or VS Code) is the same number you'd
+see in the terminal. Pick whichever surface fits the moment — they all
+report identical audit / anatomy / slim numbers, every time.
+
+> **Version compatibility (current stable triple)**: `tokopt` v0.4.0 + `tokopt-skills` v0.2.1 + `tokopt-vscode` v0.6.0 — all co-released 2026-05-30 against `getting-started` v0.4.0. The `format_version: "v1"` JSON envelope contract added in v0.4.0 is what lets `tokopt-vscode` v0.6.0's 5 surfaces fail closed on any future schema bump.
 
 ## License
 
