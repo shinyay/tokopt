@@ -17,6 +17,136 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.6.0] — 2026-06-05
+
+> **Solo binary distribution release.** Ships the `tokopt anatomy <file>`
+> positional auto-classification feature that landed in source PR
+> [shinyay/getting-started-with-token-optimization#108](https://github.com/shinyay/getting-started-with-token-optimization/pull/108)
+> (closes [source #60](https://github.com/shinyay/getting-started-with-token-optimization/issues/60)).
+> Sibling repos (`tokopt-skills`, `tokopt-vscode`) are unchanged in this
+> round; their integration PRs that consume the new positional
+> `anatomy` surface will follow as separate small releases once
+> consumers verify the new binary in the wild.
+
+### Source release notes summary
+
+The CLI binary in this release embeds the following source-level
+changes since v0.5.1 (PR #108 — the **only** `tools/tokopt/` change
+in that window):
+
+- **`tokopt anatomy <file>` — positional auto-classification**
+  ([source #60](https://github.com/shinyay/getting-started-with-token-optimization/issues/60)) —
+  `tokopt anatomy` now accepts a single positional file argument.
+  When the file matches a recognised Copilot/agent customization
+  shape, the canonical 7-segment slot is inferred from the file's
+  name and path, the rule is rendered in the report header (text
+  mode), italicized in markdown mode, or surfaced as two new
+  optional JSON fields (`inferred_segment` + `inference_rule`,
+  both `omitempty`). Nine shapes are recognised:
+  `copilot-instructions.md` / `AGENTS.md` / `instructions.md`
+  (always-on; path-anchored to repo root or `.github/`),
+  `*.agent.md` / `*.chatmode.md` / `*.instructions.md`
+  (conditional), `*.prompt.md` / `SKILL.md` (on-demand), and MCP
+  configs (`mcp(-config)?.json` under `.copilot/`, `.vscode/`,
+  `.cursor/`). Unrecognised shapes exit with a structured
+  `UNRECOGNIZED_SHAPE` error envelope and a hint suggesting an
+  explicit `--<segment>` flag. The positional form is mutually
+  exclusive with `--json` and the per-segment flags.
+
+- **JSON error envelope: new optional `hint` field** — when an error
+  message carries an embedded `\nhint: ...` suffix (e.g., the new
+  `UNRECOGNIZED_SHAPE` error), the hint body is also surfaced as a
+  structured `hint` field on the error envelope (`omitempty`), so
+  JSON consumers don't need to parse the human-readable message.
+  The `message` field retains the original full text, so text-mode
+  stderr is unchanged.
+
+- **Path-anchoring + denylist for root sentinels** — bare basename,
+  `./AGENTS.md`, `.github/AGENTS.md`, and absolute paths to root
+  sentinels all classify correctly; nested relative
+  `docs/.github/AGENTS.md` is rejected, and absolute paths whose
+  immediate parent directory is in a small false-positive denylist
+  (`docs`, `documentation`, `examples`, `node_modules`, `vendor`,
+  `test`, `tests`, `__tests__`, `third_party`, `target`, `build`,
+  `dist`, `out`) are also rejected. So doc-mirrored copies of agent
+  files do not trigger spurious matches.
+
+- **New `internal/classify` package** — zero-dependency,
+  path-based classifier extracted to its own package so future
+  audit work (e.g., [source #63](https://github.com/shinyay/getting-started-with-token-optimization/issues/63)
+  `audit --follow-references`) can reuse it without import cycles.
+
+Full source release notes:
+<https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.6.0>
+
+### Distribution surface (unchanged from v0.5.1)
+
+- Platforms: `linux/amd64`, `linux/arm64`, `darwin/amd64`,
+  `darwin/arm64`, `windows/amd64`
+- Installer: `scripts/install.sh` (verifies `SHA256SUMS`, supports
+  `--version`, `--prefix`, `--quiet`, `--dry-run` — no changes)
+- Naming: `tokopt-v0.6.0-${OS}-${ARCH}.tar.gz` (Unix) +
+  `tokopt-v0.6.0-windows-amd64.zip` (Windows manual download)
+- macOS / Windows binaries remain **unsigned** (same Known issues as
+  v0.5.1 apply)
+
+### Build provenance
+
+- Source: built from
+  [`shinyay/getting-started-with-token-optimization`](https://github.com/shinyay/getting-started-with-token-optimization)
+  tag [`v0.6.0`](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.6.0)
+  at commit `2fecf084d10dfad562ed72e14cf2b30e109492fe`.
+- Toolchain: Go 1.26.2.
+- Build flags: `CGO_ENABLED=0 -trimpath -ldflags "-s -w -X main.version=v0.6.0"`.
+- **Default build** (NO `-tags nexusja`) — matches v0.4.0/v0.5.1
+  baseline. Users who need the Kagome morphological JP Idiom stage
+  (`JpIdiomKagome`, Order=38) should build from source with
+  `-tags nexusja`. All other JP stages (`NexusJa`, `JpIdiom`
+  heuristic, `JpIdiomCosmetic`, `JpFullwidthASCIINorm`) ship in
+  these binaries.
+- Cross-compiled from Linux/amd64; `CGO_ENABLED=0` ensures fully
+  static binaries with no host C toolchain involvement.
+
+### CLI delta vs v0.5.1
+
+| Surface | v0.5.1 | v0.6.0 |
+|---|---|---|
+| `tokopt anatomy --<seg> <file>` flag-driven | report 7-segment breakdown | unchanged (byte-identical JSON envelope) |
+| `tokopt anatomy <file>` positional | error: `accepts 0 args` | new auto-classification mode |
+| Anatomy text-mode header | `tokopt anatomy  encoding=… total=…` | adds `↑ inferred segment: <seg> (rule: <r>)` line when positional |
+| Anatomy md-mode rendering | numeric table only | adds italic inference line with backtick-wrapped rule when positional |
+| Anatomy JSON envelope (flag-driven) | `{format_version, encoding, segments, total_input_tokens, warnings}` | unchanged (additive fields use `omitempty`) |
+| Anatomy JSON envelope (positional) | n/a | adds `inferred_segment`, `inference_rule` |
+| JSON error envelope | `{code, kind, message, exit_code, subcommand}` | adds `hint?` (omitempty, populated when message has `\nhint:` suffix) |
+| `tokopt anatomy <file> <file2>` (≥2 positional) | silently ignored | rejected via `cobra.MaximumNArgs(1)` |
+| All other subcommands (`count`, `detect`, `audit`, `slim`, `tail`, `chat-compact`, `antipatterns`) | as v0.5.1 | unchanged |
+
+### Companion plugins (unchanged versions)
+
+The binaries pair with two open-standard plugin distributions, both
+already compatible with v0.6.0 (no changes required for existing
+flag-driven usage; positional-form integration is opt-in):
+
+- [`shinyay/tokopt-skills`](https://github.com/shinyay/tokopt-skills) v0.2.x —
+  Copilot CLI / Chat plugin (9 skills + 2 agents). Existing flag-driven
+  `tokopt anatomy` usage in recipes continues to work; a future patch
+  may add an alternate `examples/anatomy/auto-classify-*.sh` recipe
+  showcasing the new positional form.
+- [`shinyay/tokopt-vscode`](https://github.com/shinyay/tokopt-vscode) v0.6.3 —
+  5-surface VS Code companion. CodeLens / TreeView surfaces may
+  evolve to call `tokopt anatomy <file>` directly (replacing the
+  current per-segment flag plumbing) in a future patch release.
+
+### Known issues (unchanged from v0.5.1)
+
+- macOS binaries are unsigned (Gatekeeper workaround documented).
+- Windows binaries are unsigned (SmartScreen warning).
+- JSON schemas still carry `format_version: "v1"`; future `v2`
+  would be a breaking schema change announced separately.
+- The `tokopt version` **subcommand** form does NOT exist (use
+  `tokopt --version` flag). Subcommand form tracked at
+  [source #64](https://github.com/shinyay/getting-started-with-token-optimization/issues/64).
+
 ## [0.5.1] — 2026-06-04
 
 > **Solo binary distribution release.** Ships the `tokopt detect <FILE>`
