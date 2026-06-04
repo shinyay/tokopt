@@ -17,6 +17,114 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.5.1] — 2026-06-04
+
+> **Solo binary distribution release.** Ships the `tokopt detect <FILE>`
+> single-file scan mode + ENOTDIR fix that landed in source PR
+> [shinyay/getting-started-with-token-optimization#106](https://github.com/shinyay/getting-started-with-token-optimization/pull/106).
+> Sibling repos (`tokopt-skills`, `tokopt-vscode`) are unchanged in this
+> round; their cleanup PRs will follow as separate small releases once
+> consumers verify the new binary in the wild.
+
+### Source release notes summary
+
+The CLI binary in this release embeds the following source-level changes
+since v0.4.0 (PR #106 — the **only** `tools/tokopt/` change in that
+window; all other source commits were docs/site work shipped as
+`getting-started v0.5.0`):
+
+- **`tokopt detect <FILE>` — single-file scan mode**
+  ([source #61](https://github.com/shinyay/getting-started-with-token-optimization/issues/61)) —
+  `tokopt detect` now accepts a regular file as its positional
+  argument. The repository root is inferred from the file's path
+  via a 5-tier priority (well-known suffix patterns like
+  `.github/copilot-instructions.md` / `.github/agents/*.agent.md` /
+  `.github/skills/*/SKILL.md` first, then top-level customization
+  filenames, then nearest `.git` marker — dir or file for
+  worktree/submodule support — then nearest `.github/` ancestor,
+  finally `filepath.Dir`). Findings are filtered to those mentioning
+  the input file; for multi-file 'greppy' findings
+  (`reasoning-leakage`, `polite-filler`, `format-inflation`) both
+  `location` and `evidence` are narrowed to the input file's portion.
+  The JSON envelope (`{format_version: "v1", findings: [...]}`) is
+  **unchanged** → backward-compatible for `tokopt-vscode` v0.6.0 and
+  `tokopt-skills` v0.2.0 consumers.
+
+- **`tokopt detect`: ENOTDIR error class removed** (same issue) —
+  passing a file path previously produced
+  `"open <file>/.github/copilot-instructions.md: not a directory"`.
+  Two layers of defense in depth (`antipatterns.Run` short-circuits
+  on regular-file root; `readIfExists` treats `syscall.ENOTDIR` as
+  `fs.ErrNotExist`) make this regression class unreachable.
+
+Full source release notes:
+<https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.5.1>
+
+### Distribution surface (unchanged from v0.4.0)
+
+- Platforms: `linux/amd64`, `linux/arm64`, `darwin/amd64`,
+  `darwin/arm64`, `windows/amd64`
+- Installer: `scripts/install.sh` (verifies `SHA256SUMS`, supports
+  `--version`, `--prefix`, `--quiet`, `--dry-run` — no changes)
+- Naming: `tokopt-v0.5.1-${OS}-${ARCH}.tar.gz` (Unix) +
+  `tokopt-v0.5.1-windows-amd64.zip` (Windows manual download)
+- macOS / Windows binaries remain **unsigned** (same Known issues as
+  v0.4.0 apply)
+
+### Build provenance
+
+- Source: built from
+  [`shinyay/getting-started-with-token-optimization`](https://github.com/shinyay/getting-started-with-token-optimization)
+  tag [`v0.5.1`](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.5.1)
+  at commit `c20e173cb43fb297e5c661203b7f77e55b5d7977`.
+- Toolchain: Go 1.26.2.
+- Build flags: `CGO_ENABLED=0 -trimpath -ldflags "-s -w -X main.version=v0.5.1"`.
+- **Default build** (NO `-tags nexusja`) — matches v0.4.0 baseline.
+  Users who need the Kagome morphological JP Idiom stage
+  (`JpIdiomKagome`, Order=38) should build from source with
+  `-tags nexusja`. All other JP stages (`NexusJa`, `JpIdiom`
+  heuristic, `JpIdiomCosmetic`, `JpFullwidthASCIINorm`) ship in
+  these binaries.
+- Cross-compiled from Linux/amd64; `CGO_ENABLED=0` ensures fully
+  static binaries with no host C toolchain involvement.
+
+### CLI delta vs v0.4.0
+
+| Surface | v0.4.0 | v0.5.1 |
+|---|---|---|
+| `tokopt detect <DIR>` | scan directory tree, list findings | unchanged (byte-identical output) |
+| `tokopt detect <FILE>` | error: `not a directory` | new single-file scan mode |
+| JSON envelope | `{format_version: "v1", findings: [...]}` | unchanged |
+| `Finding.location` field type | `string` | unchanged |
+| `tokopt --help`, `--version`, all other subcommands | as v0.4.0 | unchanged |
+
+### Companion plugins (unchanged versions)
+
+The binaries pair with two open-standard plugin distributions, both
+already compatible with v0.5.1 (no changes required to consume the
+new file-mode detect):
+
+- [`shinyay/tokopt-skills`](https://github.com/shinyay/tokopt-skills) v0.2.0 —
+  Copilot CLI / Chat plugin (9 skills + 2 agents). Its
+  `examples/batch/detect-all.sh` continues to use per-directory mode;
+  a future patch may add an alternate per-file recipe demonstrating
+  the new flow.
+- [`shinyay/tokopt-vscode`](https://github.com/shinyay/tokopt-vscode) v0.6.0 —
+  5-surface VS Code companion. Its `tokopt.tree.detectFile` workaround
+  (scan whole workspace + filter findings client-side) is now
+  redundant; a v0.6.1 patch will simplify the implementation to call
+  `tokopt detect <file>` directly.
+
+### Known issues (unchanged from v0.4.0)
+
+- macOS binaries are unsigned (Gatekeeper workaround documented).
+- Windows binaries are unsigned (SmartScreen warning).
+- JSON schemas still carry `format_version: "v1"`; future `v2`
+  would be a breaking schema change announced separately.
+- The `tokopt version` **subcommand** form does NOT exist (use
+  `tokopt --version` flag). Subcommand form tracked at
+  [source #64](https://github.com/shinyay/getting-started-with-token-optimization/issues/64).
+
 ## [0.4.0] — 2026-05-30
 
 > Part of a **coordinated 4-repo release** marking completion of the
