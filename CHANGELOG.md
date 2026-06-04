@@ -17,6 +17,104 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.6.1] — 2026-06-05
+
+> **Solo binary distribution release.** Ships the `tokopt version`
+> subcommand from source PR
+> [shinyay/getting-started-with-token-optimization#109](https://github.com/shinyay/getting-started-with-token-optimization/pull/109)
+> (closes [source #64](https://github.com/shinyay/getting-started-with-token-optimization/issues/64)).
+> Sibling repos (`tokopt-skills`, `tokopt-vscode`) are unchanged in this
+> round.
+
+### Source release notes summary
+
+The CLI binary in this release embeds the following source-level
+changes since v0.6.0 (PR #109 — the **only** `tools/tokopt/` change
+in that window):
+
+- **`tokopt version` subcommand**
+  ([source #64](https://github.com/shinyay/getting-started-with-token-optimization/issues/64)) —
+  adds the long-requested `tokopt version` subcommand as a peer of the
+  existing `tokopt --version` flag. Both forms now emit byte-identical
+  output (`tokopt version v0.6.1\n`), following the prevailing CLI
+  convention (`git version`, `docker version`, `kubectl version`,
+  `gh version`, `go version`). The subcommand routes through a
+  `PersistentPreRunE` bypass so it remains usable even when `--format`
+  is invalid — i.e. `tokopt --format=bad version` succeeds and matches
+  `tokopt --format=bad --version`, preserving the "interchangeable"
+  contract.
+
+### CLI delta vs v0.6.0
+
+| Command | Status in v0.6.1 |
+|---|---|
+| `tokopt version` | **NEW** subcommand |
+| `tokopt --version` | unchanged |
+| All other commands (`audit`, `anatomy`, `slim`, `detect`, `count`, `chat-compact`, `tail`, `rewind`, `report`) | unchanged |
+
+### Distribution surface (unchanged from v0.6.0)
+
+Same 5-platform matrix, same installer behaviour, same asset naming
+contract, same SHA256SUMS format. Re-running the v0.6.0 installer
+invocation with the version bumped works without any additional
+flags:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \
+  | sh -s -- --version v0.6.1
+```
+
+| Asset | OS | ARCH | Format |
+|---|---|---|---|
+| `tokopt-v0.6.1-linux-amd64.tar.gz` | linux | amd64 | tar.gz |
+| `tokopt-v0.6.1-linux-arm64.tar.gz` | linux | arm64 | tar.gz |
+| `tokopt-v0.6.1-darwin-amd64.tar.gz` | darwin | amd64 | tar.gz |
+| `tokopt-v0.6.1-darwin-arm64.tar.gz` | darwin | arm64 | tar.gz |
+| `tokopt-v0.6.1-windows-amd64.zip` | windows | amd64 | zip |
+| `SHA256SUMS` | — | — | text |
+
+### Build provenance
+
+| Field | Value |
+|---|---|
+| Source repo | [`shinyay/getting-started-with-token-optimization`](https://github.com/shinyay/getting-started-with-token-optimization) |
+| Source tag | [`v0.6.1`](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.6.1) |
+| Source commit | [`f3f1c8d`](https://github.com/shinyay/getting-started-with-token-optimization/commit/f3f1c8d) |
+| Toolchain | Go 1.26.2 |
+| Build flags | `-trimpath -ldflags "-s -w -X main.version=v0.6.1"` |
+| `CGO_ENABLED` | `0` (all 5 platforms) |
+| Build tags | none (no `-tags nexusja` — kagome ships only via source build) |
+
+### Companion plugins (unchanged versions in this round)
+
+| Plugin | Latest release | Compatibility |
+|---|---|---|
+| [`shinyay/tokopt-skills`](https://github.com/shinyay/tokopt-skills) | v0.2.1 | ✅ Compatible (no anatomy positional touch in v0.2.1 release; recipes update tracked) |
+| [`shinyay/tokopt-vscode`](https://github.com/shinyay/tokopt-vscode) | v0.6.3 | ✅ Compatible (CodeLens detail string update tracked separately) |
+
+### Known issues
+
+- _(no carried-over issues — `tokopt version` subcommand from v0.6.0 known-issues list is now resolved)_
+
+### Installation
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh
+```
+
+Or pin to this exact version:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh -s -- --version v0.6.1
+```
+
+### Refs
+
+- Source PR: [shinyay/getting-started-with-token-optimization#109](https://github.com/shinyay/getting-started-with-token-optimization/pull/109)
+- Source release: [v0.6.1](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.6.1)
+- Source issue: [#64](https://github.com/shinyay/getting-started-with-token-optimization/issues/64)
+- Distribution PR: tokopt#6 (this release)
+
 ## [0.6.0] — 2026-06-05
 
 > **Solo binary distribution release.** Ships the `tokopt anatomy <file>`
