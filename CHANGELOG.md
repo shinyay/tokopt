@@ -24,7 +24,7 @@ under each release's _Source release notes_ section.
 > Markdown reference resolver — both landed in source release
 > [v0.7.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.7.0)
 > (source PRs [#110](https://github.com/shinyay/getting-started-with-token-optimization/pull/110)
-> + [#111](https://github.com/shinyay/getting-started-with-token-optimization/pull/111),
+> and [#111](https://github.com/shinyay/getting-started-with-token-optimization/pull/111),
 > closing [source #62](https://github.com/shinyay/getting-started-with-token-optimization/issues/62)
 > and [source #63](https://github.com/shinyay/getting-started-with-token-optimization/issues/63)).
 > Sibling repos (`tokopt-skills`, `tokopt-vscode`) get one-line update
