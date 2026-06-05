@@ -17,6 +17,144 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.7.0] — 2026-06-05
+
+> **Two-feature bundle release.** Ships the `tokopt count <files...>`
+> multi-file mode and the `tokopt audit --follow-references` dynamic
+> Markdown reference resolver — both landed in source release
+> [v0.7.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.7.0)
+> (source PRs [#110](https://github.com/shinyay/getting-started-with-token-optimization/pull/110)
+> and [#111](https://github.com/shinyay/getting-started-with-token-optimization/pull/111),
+> closing [source #62](https://github.com/shinyay/getting-started-with-token-optimization/issues/62)
+> and [source #63](https://github.com/shinyay/getting-started-with-token-optimization/issues/63)).
+> Sibling repos (`tokopt-skills`, `tokopt-vscode`) get one-line update
+> for `--follow-references` discoverability and a no-change verification
+> respectively.
+
+### Source release notes summary
+
+The CLI binary in this release embeds the following source-level
+changes since v0.6.1 — unified by a coherent "complete the scan
+surface" narrative (together they answer "what does my repo cost?"
+for both arbitrary file lists and dynamically referenced agent
+dependencies):
+
+- **`tokopt count <files...>` — multi-file mode**
+  ([source #62](https://github.com/shinyay/getting-started-with-token-optimization/issues/62),
+  [source PR #110](https://github.com/shinyay/getting-started-with-token-optimization/pull/110)) —
+  `count` now accepts any number of file paths and scans them in a
+  single subprocess instead of N. Matches the conventions of `wc`,
+  `du`, and `cloc`. In text mode, each file gets its own per-line
+  entry and a `total` line is appended when more than one path is
+  supplied. In JSON mode, a single-argument invocation keeps the exact
+  pre-v0.7.0 flat envelope shape (byte-equal back-compat), while a
+  multi-argument invocation emits a single envelope
+  `{format_version, encoding, files: [{path, tokens, bytes}, …],
+  total: {tokens, bytes}}` so downstream `jq` pipelines work with one
+  subprocess instead of N. All-or-nothing semantics: if any file
+  fails to read, no per-file output is emitted (error is returned,
+  exit code is non-zero). Stdin (`-`) remains supported but must be
+  the sole argument — `tokopt count file.md -` and `tokopt count - -`
+  are rejected with a clear error message. Performance: scanning a
+  20-file subset becomes 1 subprocess instead of 20.
+
+- **`tokopt audit --follow-references` — dynamic Markdown ref resolver**
+  ([source #63](https://github.com/shinyay/getting-started-with-token-optimization/issues/63),
+  [source PR #111](https://github.com/shinyay/getting-started-with-token-optimization/pull/111)) —
+  opt-in (default OFF), best-effort path resolver that scans
+  agent/chatmode/copilot-instructions bodies for free-text references
+  to other `.md` files and surfaces resolved files that are NOT
+  already classified by static rules. **Surfaces the ~60% under-count
+  gap measured on real coordinator-style configs**
+  (`plan-agent-for-vscode`: 11,760 tokens classified statically vs
+  18,765 worst-case runtime cost; 7,005-token delta from
+  `.github/instructions/*.md` files referenced by name from the
+  coordinator agent body but lacking `applyTo:` frontmatter). Three
+  regex patterns are matched (markdown link, bare path, backtick-
+  wrapped); two-strategy resolve (source dir → root-anchored fallback)
+  with a 9-step safety pipeline (URL/abs/escape/symlink/exists/dedup).
+  JSON output adds `dynamic_references[]` array +
+  `dynamic_references_total` field (both `omitempty` when flag is
+  off). A discoverability tip (text mode only) suggests the flag when
+  the flag is OFF and the repo has at least one agent-shaped source.
+  Findings are explicitly labelled "best-effort, may not load" to
+  manage false-positive expectations — the tool does NOT model agent
+  dispatch logic, only path references. `tokopt report
+  --follow-references` mirrors `audit`.
+
+### CLI delta vs v0.6.1
+
+| Command | Status in v0.7.0 |
+|---|---|
+| `tokopt count <files...>` | **CHANGED** — accepts N files, text/JSON envelope shape per arg-count |
+| `tokopt audit --follow-references` | **NEW flag** — opt-in dynamic ref resolver |
+| `tokopt report --follow-references` | **NEW flag** — mirrors audit |
+| `tokopt count <file>` (single arg) | unchanged (byte-identical JSON to v0.6.1) |
+| `tokopt audit` (no flag) | unchanged (byte-identical text/JSON to v0.6.1) |
+| All other commands (`anatomy`, `slim`, `detect`, `chat-compact`, `tail`, `rewind`, `version`) | unchanged |
+
+### Distribution surface (unchanged from v0.6.1)
+
+Same 5-platform matrix, same installer behaviour, same asset naming
+contract, same SHA256SUMS format. Re-running the v0.6.1 installer
+invocation with the version bumped works without any additional
+flags:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \
+  | sh -s -- --version v0.7.0
+```
+
+| Asset | OS | ARCH | Format |
+|---|---|---|---|
+| `tokopt-v0.7.0-linux-amd64.tar.gz` | linux | amd64 | tar.gz |
+| `tokopt-v0.7.0-linux-arm64.tar.gz` | linux | arm64 | tar.gz |
+| `tokopt-v0.7.0-darwin-amd64.tar.gz` | darwin | amd64 | tar.gz |
+| `tokopt-v0.7.0-darwin-arm64.tar.gz` | darwin | arm64 | tar.gz |
+| `tokopt-v0.7.0-windows-amd64.zip` | windows | amd64 | zip |
+| `SHA256SUMS` | — | — | text |
+
+### Build provenance
+
+| Field | Value |
+|---|---|
+| Source repo | [`shinyay/getting-started-with-token-optimization`](https://github.com/shinyay/getting-started-with-token-optimization) |
+| Source tag | [`v0.7.0`](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.7.0) |
+| Source commit | [`fa7455c`](https://github.com/shinyay/getting-started-with-token-optimization/commit/fa7455c) |
+| Toolchain | Go 1.26.2 |
+| Build flags | `-trimpath -ldflags "-s -w -X main.version=v0.7.0"` |
+| `CGO_ENABLED` | `0` (all 5 platforms) |
+| Build tags | none (no `-tags nexusja` — kagome ships only via source build) |
+
+### Companion plugins (this round)
+
+| Plugin | Latest release | Compatibility |
+|---|---|---|
+| [`shinyay/tokopt-skills`](https://github.com/shinyay/tokopt-skills) | v0.2.1 | ✅ Compatible — one-line `--follow-references` mention pending in `token-audit` SKILL.md |
+| [`shinyay/tokopt-vscode`](https://github.com/shinyay/tokopt-vscode) | v0.6.3 | ✅ Compatible — no-change (flag is opt-in; static classification unaffected) |
+
+### Known issues
+
+- _(none carried over)_
+
+### Installation
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh
+```
+
+Or pin to this exact version:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh -s -- --version v0.7.0
+```
+
+### Refs
+
+- Source PRs: [#110 (count)](https://github.com/shinyay/getting-started-with-token-optimization/pull/110) + [#111 (audit-refs)](https://github.com/shinyay/getting-started-with-token-optimization/pull/111)
+- Source release: [v0.7.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.7.0)
+- Source issues: [#62 (count multi-file)](https://github.com/shinyay/getting-started-with-token-optimization/issues/62) + [#63 (audit follow-references)](https://github.com/shinyay/getting-started-with-token-optimization/issues/63)
+
 ## [0.6.1] — 2026-06-05
 
 > **Solo binary distribution release.** Ships the `tokopt version`
