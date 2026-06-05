@@ -17,6 +17,92 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.8.0] — 2026-06-06
+
+> **Credit projection release.** Ships the `tokopt audit / count / anatomy --credit-model=<X>` flag that projects token counts into Copilot AI Credit (**nano-AIU**) using empirical rates measured from real Copilot CLI ephemeral sessions. Four model families calibrated, **8.3× rate spread** between cheapest and most expensive. Source release [v0.8.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.8.0) (source PRs [#120](https://github.com/shinyay/getting-started-with-token-optimization/pull/120) and [#122](https://github.com/shinyay/getting-started-with-token-optimization/pull/122), closing [source #119](https://github.com/shinyay/getting-started-with-token-optimization/issues/119) and [source #121](https://github.com/shinyay/getting-started-with-token-optimization/issues/121)). No distribution-surface changes — same 5-platform matrix, same installer, same SHA256SUMS format.
+
+### Source release notes summary
+
+The CLI binary in this release embeds the following source-level changes since v0.7.0 — unified by one coherent capability: **turning the existing measurement commands (`audit`, `count`, `anatomy`) from pure token reporters into Copilot AI Credit (AIU) projectors**.
+
+- **`tokopt audit --credit-model=<X>`**
+  ([source #121](https://github.com/shinyay/getting-started-with-token-optimization/issues/121),
+  [source PR #122](https://github.com/shinyay/getting-started-with-token-optimization/pull/122))
+  — projects per-file and per-bucket token counts into nano-AIU for a specific Copilot CLI model. Adds a `NANO-AIU` column to the per-file table and prints a `Credit projection` footer with per-bucket AIU totals plus the worst-case total per turn. Embedded rate card covers the 4 model families benchmarked in source Phase 12.A: `gpt-5.5`, `claude-opus-4.7-1m-internal`, `gemini-3.1-pro-preview`, `mai-code-1-flash-internal`. Unknown model names fail fast with a list of known models. JSON output gains a `credit` block (omitempty) with `model`, `rate_source`, `rate_measured_at`, `nano_aiu_per_input_token`, plus per-bucket and total nano-AIU. Without the flag, audit output is byte-equal to v0.7.0.
+
+- **`tokopt count --credit-model=<X>`** — adds `≈N nano-AIU` to text output and `nano_aiu` field to JSON output (per-file in multi-file mode, plus a `credit_model` envelope key). Single-argument JSON shape preserved when flag absent (byte-equal to v0.7.0).
+
+- **`tokopt anatomy --credit-model=<X>`** — adds a `NANO-AIU` column to the per-segment table and prints a per-turn AIU total in the footer.
+
+- **`tokopt --credit-rates=<path>`** — global override flag for the embedded rate card. Loads an external `bench/rate-card.json` (same schema as the embedded default). Useful when re-calibrating for newer Copilot CLI versions or when measuring with non-shipped models.
+
+The rate card itself is produced by the new `bench/` standalone Python runner that also lands in source v0.8.0 ([source PR #120](https://github.com/shinyay/getting-started-with-token-optimization/pull/120)). The runner is NOT part of the binary distribution — it stays in the source repo and is run on a per-need basis when new models ship or rates need refreshing. The procedure is documented at [foundations/aiu-and-rate-cards](https://shinyay.github.io/getting-started-with-token-optimization/foundations/aiu-and-rate-cards/).
+
+### CLI delta vs v0.7.0
+
+| Command | Status in v0.8.0 |
+|---|---|
+| `tokopt audit --credit-model=<X>` | **NEW flag** — per-bucket AIU projection |
+| `tokopt count --credit-model=<X>` | **NEW flag** — per-file AIU projection (single + multi-file) |
+| `tokopt anatomy --credit-model=<X>` | **NEW flag** — per-segment AIU projection |
+| `--credit-rates=<path>` (global) | **NEW flag** — external rate card override |
+| `tokopt audit` (no flag) | unchanged (byte-identical text/JSON to v0.7.0) |
+| `tokopt count <file...>` (no flag) | unchanged (byte-identical to v0.7.0 for both single- and multi-file shapes) |
+| `tokopt anatomy <file>` (no flag) | unchanged (byte-identical to v0.7.0) |
+| `tokopt audit --follow-references` | unchanged from v0.7.0 |
+| All other commands (`slim`, `detect`, `chat-compact`, `tail`, `rewind`, `version`, `report`, `help`) | unchanged |
+
+### Empirical findings shipped in the embedded rate card
+
+The 4 model families calibrated reveal an 8.3× rate spread (nano-AIU per input token, Copilot-CLI-turn-normalized):
+
+| Model | nano-AIU / input token | Relative |
+|---|---:|---:|
+| `mai-code-1-flash-internal` | 75,000 | **1.0×** (cheapest) |
+| `gemini-3.1-pro-preview` | 190,849 | 2.5× |
+| `gpt-5.5` | 312,500 | 4.2× |
+| `claude-opus-4.7-1m-internal` | 621,782 | **8.3×** (most expensive) |
+
+The rate card is an **input-dominant empirical approximation** — it includes the fixed ~24k system+tools context overhead amortized into per-input-token cost, does NOT separately model output / cache_read / cache_write / reasoning rates, and is intended for **comparative model-selection analysis**, not as a substitute for the GitHub Copilot billing dashboard. Limitations documented at [foundations/aiu-and-rate-cards](https://shinyay.github.io/getting-started-with-token-optimization/foundations/aiu-and-rate-cards/).
+
+### Back-compat
+
+Without `--credit-model`, all three measurement commands produce output that is **byte-identical** to v0.7.0. Enforced by:
+
+- `omitempty` JSON tags on every new struct field (`credit`, `nano_aiu`, etc.)
+- 10 integration tests in source `tools/tokopt/cmd/tokopt/credit_test.go` assert ABSENCE of credit keys when the flag is absent across text + JSON + md formats
+- Full `go test -race ./...` green for all 14 source packages
+
+Existing users see **zero change** until they opt in. Existing `jq` pipelines, CI gates, and downstream tooling are unaffected.
+
+### Distribution surface (unchanged from v0.7.0)
+
+Same 5-platform matrix, same installer behaviour, same asset naming contract, same SHA256SUMS format. Re-running the v0.7.0 installer with `--version v0.8.0` (or with no version flag once the release is live) upgrades cleanly.
+
+- `tokopt-v0.8.0-linux-amd64.tar.gz`
+- `tokopt-v0.8.0-linux-arm64.tar.gz`
+- `tokopt-v0.8.0-darwin-amd64.tar.gz`
+- `tokopt-v0.8.0-darwin-arm64.tar.gz`
+- `tokopt-v0.8.0-windows-amd64.zip`
+- `SHA256SUMS` (covers all 5)
+
+### Refresh procedure (for re-calibration)
+
+When new Copilot CLI versions ship or you want to re-measure:
+
+```bash
+# Source repo
+python3 bench/run.py update-rate-card --models=<list> --yes
+cp bench/rate-card.json tools/tokopt/internal/credit/rates_embedded.json
+cd tools/tokopt && go build -o ~/bin/tokopt ./cmd/tokopt
+```
+
+Or supply your own rate card at runtime without rebuilding:
+
+```bash
+tokopt audit . --credit-model=gpt-5.5 --credit-rates=/path/to/my-rate-card.json
+```
+
 ## [0.7.0] — 2026-06-05
 
 > **Two-feature bundle release.** Ships the `tokopt count <files...>`
