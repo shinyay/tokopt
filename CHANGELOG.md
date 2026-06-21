@@ -17,6 +17,69 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.9.0] — 2026-06-21
+
+> **Rate-card expansion + model discovery release.** The embedded credit
+> rate card grows from **4 to 19 models** (4 empirically calibrated + 15
+> catalog-derived from official GitHub Copilot list prices), so
+> `--credit-model` now projects cost for common models like
+> `claude-opus-4.8`, `gpt-5.4`, and `claude-haiku-4.5` out of the box. A new
+> **`tokopt models`** command lists the card's models with a per-model
+> `basis` (`empirical` vs `catalog`). Source release
+> [v0.9.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.9.0)
+> (source PRs [#167](https://github.com/shinyay/getting-started-with-token-optimization/pull/167),
+> [#168](https://github.com/shinyay/getting-started-with-token-optimization/pull/168);
+> usability papercuts [#162](https://github.com/shinyay/getting-started-with-token-optimization/pull/162)
+> closing [source #147](https://github.com/shinyay/getting-started-with-token-optimization/issues/147)).
+> No distribution-surface changes — same 5-platform matrix, same installer,
+> same `SHA256SUMS` format.
+
+### Source release notes summary
+
+The CLI binary in this release embeds the following source-level changes
+since v0.8.0:
+
+- **Embedded rate card expanded to 19 models**
+  ([source #167](https://github.com/shinyay/getting-started-with-token-optimization/pull/167))
+  — the empirically-calibrated 4-model card is merged with catalog-derived
+  rates (official UBB input list price × 100,000) for the remaining models
+  via the new `bench/merge_rate_card.py`, producing `bench/rate-card-full.json`.
+  Each model now carries a `basis` field: `empirical` (measured) or
+  `catalog` (a conservative input-price upper bound; no cache/output/reasoning
+  modeling). Selecting a catalog model such as `claude-opus-4.8` no longer
+  errors with "unknown model".
+
+- **New `tokopt models` command**
+  ([source #168](https://github.com/shinyay/getting-started-with-token-optimization/pull/168))
+  — lists the active card's models (name + `basis` + rate) in `text` / `json`
+  / `md`. `--format json` is the machine-readable contract
+  (`{format_version, rate_source, models:[…]}`) that tooling (the VS Code
+  extension) reads to discover the model set instead of hardcoding it.
+  Honours `--credit-rates` to list an external card.
+
+- **Basis surfaced in credit output** — the `audit` and `anatomy`
+  credit-projection footers print the `basis`, flagging catalog rates as a
+  conservative list-price estimate. `tokopt count --format json` gains a
+  `rate_basis` field alongside `credit_model`.
+
+- **CLI usability papercuts**
+  ([source #162](https://github.com/shinyay/getting-started-with-token-optimization/pull/162),
+  closing [source #147](https://github.com/shinyay/getting-started-with-token-optimization/issues/147))
+  — `anatomy` error hints enumerate all 7 `--<segment>` flags; `tail`
+  "column not found" suggests `--column` and auto-proposes a `*token*`
+  candidate; `chat-compact` and `slim` now accept a positional file argument
+  as an alias for `--input` (consistent with `count`).
+
+### CLI delta vs v0.8.0
+
+| Command | Status in v0.9.0 |
+|---|---|
+| `tokopt models` | **NEW command** — list rate-card models + basis |
+| `tokopt --credit-model=<X>` | Embedded card now knows **19 models** (was 4) |
+| `tokopt audit / anatomy` credit footer | Now prints `basis=empirical\|catalog` + catalog caveat |
+| `tokopt count --format json` | Gains `rate_basis` field |
+| `tokopt anatomy / tail / chat-compact / slim` | Friendlier error hints + positional-file aliases |
+
 ## [0.8.0] — 2026-06-06
 
 > **Credit projection release.** Ships the `tokopt audit / count / anatomy --credit-model=<X>` flag that projects token counts into Copilot AI Credit (**nano-AIU**) using empirical rates measured from real Copilot CLI ephemeral sessions. Four model families calibrated, **8.3× rate spread** between cheapest and most expensive. Source release [v0.8.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.8.0) (source PRs [#120](https://github.com/shinyay/getting-started-with-token-optimization/pull/120) and [#122](https://github.com/shinyay/getting-started-with-token-optimization/pull/122), closing [source #119](https://github.com/shinyay/getting-started-with-token-optimization/issues/119) and [source #121](https://github.com/shinyay/getting-started-with-token-optimization/issues/121)). No distribution-surface changes — same 5-platform matrix, same installer, same SHA256SUMS format.

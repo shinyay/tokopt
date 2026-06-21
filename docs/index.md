@@ -112,6 +112,7 @@ Exhaustive, dry, accurate. Look something up; close the tab.
 - [commands/tail.md](commands/tail.md)
 - [commands/report.md](commands/report.md)
 - [commands/count.md](commands/count.md)
+- [commands/models.md](commands/models.md)
 - [reference/exit-codes.md](reference/exit-codes.md)
 - [reference/output-formats.md](reference/output-formats.md)
 - [reference/encodings.md](reference/encodings.md)

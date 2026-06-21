@@ -95,7 +95,7 @@ tokenizer is local (`tiktoken-go`, `o200k_base` by default).
 
 ## 📦 What's in the box
 
-Six commands cover the audit → diagnose → recommend loop. Each links to its
+Seven commands cover the audit → diagnose → recommend loop. Each links to its
 own reference doc.
 
 | Command | Purpose | Doc |
@@ -106,9 +106,15 @@ own reference doc.
 | `tail` | p50 / p90 / p95 / p99 / max + outliers from a JSONL or CSV usage log. | [docs/commands/tail.md](docs/commands/tail.md) |
 | `report` | Combined audit + detect dashboard with ranked recommendations. CI-friendly via `--threshold`. | [docs/commands/report.md](docs/commands/report.md) |
 | `count` | Token count for any file. Use `-` for stdin. | [docs/commands/count.md](docs/commands/count.md) |
+| `models` | List the models the rate card can project cost for (name + `basis`). | [docs/commands/models.md](docs/commands/models.md) |
 
 Global flags: `--encoding {o200k_base,cl100k_base}`, `--format {text,json,md}`,
-`--reference-window N` (opt-in only — no default model size is implied). See
+`--reference-window N` (opt-in only — no default model size is implied). The
+optional `--credit-model <name>` projects token counts into **AI Credit
+(nano-AIU)** — never dollars — using the embedded rate card; run
+`tokopt models` for the list, and see
+[the source repo's AIU & rate cards page](https://github.com/shinyay/getting-started-with-token-optimization/blob/main/website/docs/foundations/aiu-and-rate-cards.en.md)
+for methodology. See
 [docs/reference/cli-reference.md](docs/reference/cli-reference.md).
 
 ## 🧭 Three ways to use it
@@ -156,7 +162,7 @@ hub linking every doc below.
 
 ### 📋 Commands & reference
 
-- [docs/commands/](docs/commands/) — one page per command: `audit`, `anatomy`, `detect`, `tail`, `report`, `count`.
+- [docs/commands/](docs/commands/) — one page per command: `audit`, `anatomy`, `detect`, `tail`, `report`, `count`, `models`.
 - [docs/reference/cli-reference.md](docs/reference/cli-reference.md) — `--encoding`, `--format`, `--reference-window`, full flag matrix.
 - [docs/reference/exit-codes.md](docs/reference/exit-codes.md) — `0` = ok, `1` = error, `2` = budget exceeded.
 - [docs/reference/output-formats.md](docs/reference/output-formats.md) — `text`, `json`, `md` schemas.

@@ -23,6 +23,8 @@ These flags are persistent — every subcommand accepts them.
 | `--encoding`          | string | `o200k_base`  | Tokenizer encoding. Valid: `o200k_base`, `cl100k_base`. See [`encodings.md`](encodings.md). |
 | `--format`            | string | `text`        | Output format. Valid: `text`, `json`, `md`. Validated at startup. See [`output-formats.md`](output-formats.md). |
 | `--reference-window`  | int    | `0` (off)     | If `> 0`, also expresses the always-on tax as a percentage of this window size. Used by `audit` and `report`. |
+| `--credit-model`      | string | `""` (off)    | Project token counts into **AI Credit (nano-AIU)** using this model's rate. Run `tokopt models` for valid names. Disabled when empty. |
+| `--credit-rates`      | string | `""`          | Path to an external `rate-card.json` that overrides the embedded card. Only consulted when `--credit-model` is also set. |
 | `--version`           | —      | —             | Prints `tokopt version vX.Y.Z` and exits. Build-injected via `-ldflags`. |
 | `--help`, `-h`        | —      | —             | Prints help for the root or any subcommand. Auto-added by cobra. |
 
@@ -33,6 +35,7 @@ These flags are persistent — every subcommand accepts them.
 | `audit`   | Scan a repo's always-on Copilot config and report the token tax | [`audit.md`](../commands/audit.md) |
 | `anatomy` | Decompose a prompt into the seven canonical segments            | [`anatomy.md`](../commands/anatomy.md) |
 | `count`   | Count tokens in a single file (or stdin)                        | [`count.md`](../commands/count.md) |
+| `models`  | List the rate card's models (name + `basis` empirical/catalog)  | [`models.md`](../commands/models.md) |
 | `detect`  | Run anti-pattern detectors against a repo's static config       | [`detect.md`](../commands/detect.md) |
 | `report`  | Combined `audit` + `detect` dashboard with CI gate              | [`report.md`](../commands/report.md) |
 | `tail`    | Heavy-tail percentile analysis of a usage log (JSONL or CSV)    | [`tail.md`](../commands/tail.md) |
@@ -112,6 +115,32 @@ tokopt count <file> [--format text|json] [--encoding ENC]
 **Exit codes**: `0` on success. `1` on I/O errors or invalid flags.
 
 See also: [`../commands/count.md`](../commands/count.md).
+
+---
+
+## `tokopt models`
+
+List the models the active rate card can project cost for, with each
+model's `basis` (`empirical` measured rate vs `catalog` list-price
+estimate). These names are valid `--credit-model` values.
+
+```text
+tokopt models [--format text|json|md] [--credit-rates PATH]
+```
+
+| Arg / Flag       | Notes |
+|------------------|-------|
+| `--format`       | `text` (default), `json`, or `md`. JSON emits `{format_version, rate_source, models:[{name, rate_status, basis, nano_aiu_per_input_token}]}`. |
+| `--credit-rates` | Optional external `rate-card.json`; when set, lists that card's models instead of the embedded default. |
+
+The embedded card ships **19 models** (4 empirically calibrated + 15
+catalog-derived). Catalog rates are a conservative input-price upper
+bound. See [`../commands/models.md`](../commands/models.md) and
+[the source repo's AIU & rate cards page](https://github.com/shinyay/getting-started-with-token-optimization/blob/main/website/docs/foundations/aiu-and-rate-cards.en.md).
+
+**Exit codes**: `0` on success. `1` on a malformed external card.
+
+See also: [`../commands/models.md`](../commands/models.md).
 
 ---
 
