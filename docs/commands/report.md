@@ -6,7 +6,7 @@ CI-friendly token-budget gate.
 ## Synopsis
 
 ```bash
-tokopt report [path] [--threshold N] [--reference-window N] \
+tokopt report [path] [--by-model] [--threshold N] [--reference-window N] \
               [--format text|json|md] [--encoding o200k_base|cl100k_base]
 ```
 
@@ -23,6 +23,12 @@ When `--threshold N` is set and the audit's `always_on_total` exceeds
 violation message to stderr and exits with **code 2**. This is the
 intended CI gate.
 
+With `--by-model`, `report` switches to a focused **model cost ranking**:
+it runs the audit and projects the repo's token tax onto **every model
+in the active rate card**, ranked by projected AI Credit (nano-AIU) cost,
+cheapest first. It skips detect and cannot be combined with
+`--credit-model` or `--threshold`. See [Model cost ranking](#model-cost-ranking---by-model).
+
 ## Arguments
 
 | Name   | Required | Default | Description                            |
@@ -33,10 +39,33 @@ intended CI gate.
 
 | Flag                 | Type   | Default      | Description                                                                                                                |
 |----------------------|--------|--------------|----------------------------------------------------------------------------------------------------------------------------|
+| `--by-model`         | bool   | `false`      | Rank every rate-card model by this repo's projected cost (cheapest first). Skips detect; honours `--credit-rates`; cannot be combined with `--credit-model` or `--threshold`. |
 | `--threshold`        | int    | `0`          | Always-on token budget. If `> 0` and `always_on_total > --threshold`, exit code 2. Gate applies to **always-on only** — conditional and on-demand totals are not budgeted. |
 | `--encoding`         | string | `o200k_base` | Tokenizer encoding.                                                                                                        |
 | `--format`           | string | `text`       | Output format: `text`, `json`, or `md`.                                                                                    |
 | `--reference-window` | int    | `0`          | If `> 0`, audit also reports always-on tax as `% of <window>`.                                                             |
+
+## Model cost ranking (`--by-model`)
+
+Answers "which model is cheapest for *this* repo?" in one command,
+instead of running `--credit-model` once per model:
+
+```text
+tokopt report  by-model (rate source=embedded)
+repo tax: always-on=2412  total(worst-case/turn)=8377 tokens  (19 models)
+
+MODEL                        BASIS      ALWAYS-ON AIU  TOTAL AIU  REL
+gpt-5-mini                   catalog    0.060300       0.209425   1.0x
+…
+claude-opus-4.8              catalog    1.206000       4.188500   20.0x
+```
+
+The `BASIS` column distinguishes `empirical` (measured) from `catalog`
+(list-price upper-bound) rates. `--format json` emits a `{repo, models}`
+envelope (additive — `format_version` stays `v1`). This is the CLI behind
+the VS Code extension's model cost comparison view. See
+[`models.md`](models.md) and the source repo's
+[AIU & rate cards page](https://github.com/shinyay/getting-started-with-token-optimization/blob/main/website/docs/foundations/aiu-and-rate-cards.en.md).
 
 ## Output
 

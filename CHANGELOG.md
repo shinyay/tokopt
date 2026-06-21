@@ -17,6 +17,38 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.10.0] — 2026-06-21
+
+> **Model cost ranking release.** Adds `tokopt report --by-model`: project
+> a repo's token tax across **every model in the rate card** and rank them
+> cheapest-first by AI Credit (nano-AIU) cost — answering "which model is
+> cheapest for _my_ config?" in one command. Source release
+> [v0.10.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.10.0)
+> (source PR [#172](https://github.com/shinyay/getting-started-with-token-optimization/pull/172),
+> closing [source #171](https://github.com/shinyay/getting-started-with-token-optimization/issues/171)).
+> No distribution-surface changes — same 5-platform matrix, same installer,
+> same `SHA256SUMS` format.
+
+### Source release notes summary
+
+- **`tokopt report --by-model`**
+  ([source #171](https://github.com/shinyay/getting-started-with-token-optimization/pull/172))
+  — runs the audit once, then projects the always-on / total token tax onto
+  every model in the active rate card, ranked ascending by projected
+  nano-AIU (cheapest first), with each model's `basis` (`empirical` vs
+  `catalog`) and a relative-cost column. Skips anti-pattern detection
+  (focused output); honours `--credit-rates`; errors if combined with
+  `--credit-model` or `--threshold`, or if the card has no projectable
+  models. `text` / `md` / `json`; the JSON envelope is **additive**
+  (`format_version` stays `v1`). This is the CLI behind the VS Code
+  extension's model cost comparison view (tokopt-vscode ≥ 0.13.0).
+
+### CLI delta vs v0.9.0
+
+| Command | Status in v0.10.0 |
+|---|---|
+| `tokopt report --by-model` | **NEW flag** — rank all rate-card models by projected cost |
+
 ## [0.9.0] — 2026-06-21
 
 > **Rate-card expansion + model discovery release.** The embedded credit
