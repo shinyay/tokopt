@@ -17,6 +17,7 @@ kept numerically identical. Coordination is by this matrix plus periodic
 
 | Consumer feature | Requires tokopt CLI | Below that |
 |---|---|---|
+| Extension: model cost comparison view (dashboard) | **≥ 0.10.0** (`tokopt report --by-model`) | Comparison section omitted; rest of dashboard unaffected |
 | Extension: model picker auto-discovery (lists the binary's embedded models) | **≥ 0.9.0** (`tokopt models`) | Falls back to a built-in 4-model list |
 | Extension: `--credit-rates` external rate card (`tokopt.creditRatesPath`) | **≥ 0.8.0** | Setting ignored |
 | Extension / skills: AI Credit projection (`--credit-model`) | **≥ 0.8.0** | Tokens-only (no cost) |
@@ -43,7 +44,7 @@ its own appropriate bump. Versions differ on purpose.
 | Wave | Theme | tokopt CLI | tokopt-vscode | tokopt-skills |
 |---|---|---|---|---|
 | (baseline) | Custom rate cards + 19-model card + picker discovery | 0.9.0 | 0.12.0 | 0.2.1 |
-| **Wave 1** (planned) | Model Cost Intelligence | **0.10.0** | **0.13.0** | **0.3.0** |
+| **Wave 1** (in progress) | Model Cost Intelligence | **0.10.0** | **0.13.0** (model cost comparison) | **0.3.0** |
 
 Wave 1 tracking milestones:
 
