@@ -177,13 +177,14 @@ Combined `audit` + `detect` dashboard with ranked recommendations and a
 CI-friendly token-budget gate.
 
 ```text
-tokopt report [path] [--threshold N]
+tokopt report [path] [--by-model] [--threshold N]
               [--reference-window N] [--format text|json|md] [--encoding ENC]
 ```
 
 | Arg / Flag           | Default | Notes |
 |----------------------|---------|-------|
 | `path` (positional)  | `.`     | Repo root to scan. Optional. |
+| `--by-model`         | `false` | Rank every rate-card model by this repo's projected AI Credit cost (cheapest first). Skips detect; honours `--credit-rates`; mutually exclusive with `--credit-model` and `--threshold`. |
 | `--threshold`        | `0`     | If `> 0`, exit with code **2** when the **always-on** tax `>` this token count. Strict greater-than: `==` passes. Gate covers always-on only — conditional and on-demand are not budgeted. |
 | `--reference-window` | `0`     | Inherited global. |
 | `--format`           | `text`  | Inherited global. |
