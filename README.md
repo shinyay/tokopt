@@ -166,6 +166,8 @@ hub linking every doc below.
 - [docs/reference/cli-reference.md](docs/reference/cli-reference.md) — `--encoding`, `--format`, `--reference-window`, full flag matrix.
 - [docs/reference/exit-codes.md](docs/reference/exit-codes.md) — `0` = ok, `1` = error, `2` = budget exceeded.
 - [docs/reference/output-formats.md](docs/reference/output-formats.md) — `text`, `json`, `md` schemas.
+- [VERSIONING.md](VERSIONING.md) — SemVer policy, `format_version` wire contracts, road to 1.0.
+- [COMPATIBILITY.md](COMPATIBILITY.md) — canonical matrix: which CLI version each sibling (extension / skills) feature needs, plus release trains.
 
 ### 🛠 How-to
 
