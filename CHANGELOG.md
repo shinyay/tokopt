@@ -17,6 +17,26 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.11.0] — 2026-07-01
+
+> **Japanese support + slim idempotency release.** No distribution-surface
+> changes — same 5-platform matrix (linux/darwin amd64+arm64, windows amd64),
+> same `scripts/install.sh`, same `SHA256SUMS` format. This binary release
+> packages **tokopt v0.11.0** from the source repo.
+>
+> Source-side highlights:
+> - `tokopt detect` now understands **Japanese** anti-patterns
+>   (source [#174](https://github.com/shinyay/getting-started-with-token-optimization/pull/176))
+>   and does not flag negated Japanese directives
+>   (source [#177](https://github.com/shinyay/getting-started-with-token-optimization/pull/177)).
+> - `tokopt slim` **Japanese-compression discoverability** hint + docs
+>   (source [#175](https://github.com/shinyay/getting-started-with-token-optimization/pull/178)).
+> - `tokopt slim` is now **idempotent** — `Run(Run(x)) == Run(x)`
+>   (source [#6](https://github.com/shinyay/getting-started-with-token-optimization/pull/180)).
+>
+> Full source-repo notes:
+> [v0.11.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.11.0).
+
 ## [0.10.0] — 2026-06-21
 
 > **Model cost ranking release.** Adds `tokopt report --by-model`: project
@@ -827,6 +847,7 @@ Full source-repo release notes:
   schemas. See [docs/maintainer/release.md](docs/maintainer/release.md#versioning-policy-semver)
   for the full policy.
 
-[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/shinyay/tokopt/releases/tag/v0.11.0
 [0.4.0]: https://github.com/shinyay/tokopt/releases/tag/v0.4.0
 [0.1.0]: https://github.com/shinyay/tokopt/releases/tag/v0.1.0
