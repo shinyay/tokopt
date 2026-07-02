@@ -17,6 +17,24 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.13.0] — 2026-07-02
+
+> **Slim JSON profile recommendations release.** No distribution-surface
+> changes — same 5-platform matrix (linux/darwin amd64+arm64, windows amd64),
+> same `scripts/install.sh`, same `SHA256SUMS` format. This binary release
+> packages **tokopt v0.13.0** from the source repo.
+>
+> Source-side highlight:
+> - `tokopt slim --format json` **`recommendations`** now also suggest
+>   **`--profile api-json`** (JSON input without `--lossy`) and
+>   **`--profile claude-md`** (Japanese `CLAUDE.md`), alongside the existing
+>   `--enable-jp-idiom` — source
+>   [#187](https://github.com/shinyay/getting-started-with-token-optimization/pull/187).
+>   Additive + `omitempty`, so `format_version` stays `v1`.
+>
+> Full source-repo notes:
+> [v0.13.0](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.13.0).
+
 ## [0.12.0] — 2026-07-02
 
 > **Detector precision + slim JSON recommendations release.** No
@@ -866,7 +884,8 @@ Full source-repo release notes:
   schemas. See [docs/maintainer/release.md](docs/maintainer/release.md#versioning-policy-semver)
   for the full policy.
 
-[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/shinyay/tokopt/releases/tag/v0.13.0
 [0.12.0]: https://github.com/shinyay/tokopt/releases/tag/v0.12.0
 [0.11.0]: https://github.com/shinyay/tokopt/releases/tag/v0.11.0
 [0.4.0]: https://github.com/shinyay/tokopt/releases/tag/v0.4.0
