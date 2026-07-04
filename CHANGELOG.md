@@ -17,6 +17,23 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.14.0] — 2026-07-04
+
+> **SemanticDedup release.** No distribution-surface changes — same 5-platform
+> matrix (linux/darwin amd64+arm64, windows amd64), same `scripts/install.sh`,
+> same `SHA256SUMS` format. This binary release packages **tokopt v0.14.0**
+> from the source repo.
+>
+> Source-side highlight:
+> - `tokopt slim` gains a **`SemanticDedup`** stage (Phase 2.2, #192). Under
+>   `--lossy` (or `--profile api-json`), near-duplicate blocks (paragraphs,
+>   fenced code, or one-record-per-line for JSONL) are replaced with compact
+>   `[[DEDUP_REF:<idx>]]` references to the canonical block, charging repeated
+>   content once. Character-3-gram simhash + LSH (locale-stable for Japanese),
+>   runs last (Order=43) after Ionizer/TonForm, lossy-gated and idempotent.
+>
+> Full source notes: https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.14.0
+
 ## [0.13.0] — 2026-07-02
 
 > **Slim JSON profile recommendations release.** No distribution-surface
@@ -884,7 +901,8 @@ Full source-repo release notes:
   schemas. See [docs/maintainer/release.md](docs/maintainer/release.md#versioning-policy-semver)
   for the full policy.
 
-[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/shinyay/tokopt/releases/tag/v0.14.0
 [0.13.0]: https://github.com/shinyay/tokopt/releases/tag/v0.13.0
 [0.12.0]: https://github.com/shinyay/tokopt/releases/tag/v0.12.0
 [0.11.0]: https://github.com/shinyay/tokopt/releases/tag/v0.11.0
