@@ -17,6 +17,24 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.16.0] — 2026-07-05
+
+> **`tokopt slim --expand` release.** No distribution-surface changes — same
+> 5-platform matrix (linux/darwin amd64+arm64, windows amd64), same
+> `scripts/install.sh`, same `SHA256SUMS` format. This binary release packages
+> **tokopt v0.16.0** from the source repo.
+>
+> Source-side highlight:
+> - **`tokopt slim --expand`** reverses a `--lossy` SemanticDedup output back to
+>   its original content ([#199](https://github.com/shinyay/getting-started-with-token-optimization/pull/200)).
+>   SemanticDedup now prepends a self-describing `[[DEDUP_META:v=1;mode=…;lossy=…]]`
+>   header so the deduped output is deterministically reversible;
+>   `tokopt slim --expand --input <file>` (or `-`) restores the original
+>   **byte-exact** for exact (`lossy=0`) dedup, and refuses lossy outputs rather
+>   than reconstruct them falsely.
+>
+> Full source notes: https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.16.0
+
 ## [0.15.0] — 2026-07-05
 
 > **SemanticDedup exact-default + YAML TonForm release.** No distribution-surface
@@ -929,7 +947,8 @@ Full source-repo release notes:
   schemas. See [docs/maintainer/release.md](docs/maintainer/release.md#versioning-policy-semver)
   for the full policy.
 
-[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/shinyay/tokopt/releases/tag/v0.16.0
 [0.15.0]: https://github.com/shinyay/tokopt/releases/tag/v0.15.0
 [0.14.0]: https://github.com/shinyay/tokopt/releases/tag/v0.14.0
 [0.13.0]: https://github.com/shinyay/tokopt/releases/tag/v0.13.0
