@@ -17,6 +17,34 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.15.0] — 2026-07-05
+
+> **SemanticDedup exact-default + YAML TonForm release.** No distribution-surface
+> changes — same 5-platform matrix (linux/darwin amd64+arm64, windows amd64),
+> same `scripts/install.sh`, same `SHA256SUMS` format. This binary release
+> packages **tokopt v0.15.0** from the source repo.
+>
+> Source-side highlights:
+> - **`tokopt slim` SemanticDedup now defaults to exact (byte-identical) dedup;
+>   near-duplicate matching is opt-in** (data-safety;
+>   [#197](https://github.com/shinyay/getting-started-with-token-optimization/pull/197)).
+>   Near-duplicate merging could silently **corrupt data** (e.g. `balance=100` vs
+>   `balance=000` merged, dropping the distinguishing value). The default pipeline
+>   now deduplicates only byte-identical blocks (lossless, byte-exact recoverable);
+>   near-matching stays available via `SemanticDedupOptions.HammingThreshold > 0`.
+>   Measured 19.6% (exact) vs 25.5% (near) on a real 1,986-record dump — the safe
+>   default keeps ~77% of the savings. **Changes the near-on-by-default behavior
+>   shipped in v0.14.0; upgrading is recommended.**
+> - **TonForm now supports YAML input** (Phase 2.4, gs#2 — Phase 2 complete;
+>   [#195](https://github.com/shinyay/getting-started-with-token-optimization/pull/195),
+>   [#196](https://github.com/shinyay/getting-started-with-token-optimization/pull/196)).
+>   Structured YAML (K8s manifests, Actions, knowledge graphs) compresses
+>   losslessly ~12–35%; multi-document YAML is decoded in full; tags whose meaning
+>   cannot survive TOON (`!Ref`/`!Sub`/`!GetAtt`, `!!binary`, custom `!tag`)
+>   soft-skip rather than being silently dropped.
+>
+> Full source notes: https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.15.0
+
 ## [0.14.0] — 2026-07-04
 
 > **SemanticDedup release.** No distribution-surface changes — same 5-platform
@@ -901,7 +929,8 @@ Full source-repo release notes:
   schemas. See [docs/maintainer/release.md](docs/maintainer/release.md#versioning-policy-semver)
   for the full policy.
 
-[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/shinyay/tokopt/releases/tag/v0.15.0
 [0.14.0]: https://github.com/shinyay/tokopt/releases/tag/v0.14.0
 [0.13.0]: https://github.com/shinyay/tokopt/releases/tag/v0.13.0
 [0.12.0]: https://github.com/shinyay/tokopt/releases/tag/v0.12.0
