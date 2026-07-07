@@ -17,6 +17,27 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.17.0] — 2026-07-07
+
+> **Lossy YAML + SemanticDedup naming release.** No distribution-surface
+> changes — same 5-platform matrix (linux/darwin amd64+arm64, windows amd64),
+> same `scripts/install.sh`, same `SHA256SUMS` format. This binary release
+> packages **tokopt v0.17.0** from the source repo.
+>
+> Source-side highlights:
+> - **`tokopt slim --lossy` now collapses large record arrays in YAML input**,
+>   not just JSON ([#202](https://github.com/shinyay/getting-started-with-token-optimization/pull/205)).
+>   YAML is decoded via the safe decoder (custom/unsafe tags soft-skip, #196),
+>   large arrays are collapsed to `{schema, sample, count}` + a
+>   `_rewind:"sha256:…"` reference, and the originals are stored in the Rewind
+>   store. Measured 10,002 → 299 tokens (97.0% saved) on a 200-record YAML dump;
+>   tiny config YAML is unaffected. The reported `content_type` stays `yaml`.
+> - **SemanticDedup is documented as exact-by-default**
+>   ([#203](https://github.com/shinyay/getting-started-with-token-optimization/pull/204));
+>   the near-duplicate path is opt-in. No behaviour or output-schema change.
+>
+> Full source notes: https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.17.0
+
 ## [0.16.0] — 2026-07-05
 
 > **`tokopt slim --expand` release.** No distribution-surface changes — same
@@ -947,7 +968,8 @@ Full source-repo release notes:
   schemas. See [docs/maintainer/release.md](docs/maintainer/release.md#versioning-policy-semver)
   for the full policy.
 
-[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/shinyay/tokopt/releases/tag/v0.17.0
 [0.16.0]: https://github.com/shinyay/tokopt/releases/tag/v0.16.0
 [0.15.0]: https://github.com/shinyay/tokopt/releases/tag/v0.15.0
 [0.14.0]: https://github.com/shinyay/tokopt/releases/tag/v0.14.0
