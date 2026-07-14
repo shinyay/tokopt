@@ -68,6 +68,10 @@ mai-code-1-flash-internal    empirical  75000
 Entries are sorted by `name`. `rate_source` is `embedded` or
 `external:<path>`.
 
+The embedded v1 card is a static snapshot verified on **2026-06-06**, not a
+live provider catalog. Use `measured_at` to judge freshness; missing newer
+models or billing dimensions must not silently fall back to another rate.
+
 ### `--format md`
 
 A markdown table (`| Model | Basis | nano-AIU / input token |`), handy for

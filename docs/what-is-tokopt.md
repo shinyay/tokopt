@@ -7,46 +7,36 @@ what you're about to put on your `PATH`.
 
 ## What it is
 
-**tokopt is a small Go CLI that measures the token cost of the
-LLM-facing files in your repository** — system prompts, agent
-definitions, skills, conditional instructions, `AGENTS.md`,
-`copilot-instructions.md`, the lot — and surfaces the anti-patterns
-that quietly inflate them. It runs locally, it reads files on disk,
-it prints token counts. That is the whole job.
+**tokopt is a local Go CLI for measuring and safely reducing the token cost
+of LLM-facing repository assets and transcripts.** It scans system prompts,
+agent definitions, skills, scoped instructions, `AGENTS.md`, and
+`copilot-instructions.md`; it can also preview deterministic slim operations,
+manage recovery artifacts, and compact JSONL chat history. No LLM or telemetry
+is involved.
 
-It deliberately reports tokens, not dollars. Pricing changes month
-to month; the underlying unit of account does not. If your
-always-on tax is 4,200 tokens today, it will still be 4,200 tokens
-when the next price sheet drops.
+Tokens remain the primary measurement. Optional nano-AIU output is an
+input-only comparison scenario, not a dollar amount or invoice estimate.
 
 ---
 
 ## What it does
 
-Six commands. Verified against
+Thirteen root commands. Verified against
 [`tools/tokopt/cmd/tokopt/main.go`](https://github.com/shinyay/getting-started-with-token-optimization/blob/main/tools/tokopt/cmd/tokopt/main.go)
 in the source repo.
 
-- **`audit [path]`** — scans a repo's always-on Copilot
-  configuration and reports the token tax (the cost paid on
-  *every* call).
-- **`anatomy`** — decomposes a prompt into the seven canonical
-  segments (`system`, `always-on`, `tools`, `history`, `retrieved`,
-  `user`, `reasoning`) and tells you where the tokens went.
-- **`detect [path]`** — runs anti-pattern detectors against the
-  static config and flags suspected token waste.
-- **`tail`** — heavy-tail percentile analysis (p50/p90/p95/p99/max
-  plus top-N outliers) over a usage log, JSONL or CSV.
-- **`report [path]`** — combined audit + detect dashboard with
-  ranked recommendations; with `--threshold N`, exits code 2 if
-  the always-on tax exceeds `N` (the CI gate).
-- **`count <file>`** — count tokens in a single file (or stdin
-  with `-`). The simplest possible smoke test.
+- Measurement and diagnosis: **`audit`**, **`anatomy`**, **`count`**,
+  **`detect`**, **`tail`**, and **`report`**.
+- Deterministic transformation and recovery: **`slim`**, **`rewind`**, and
+  **`chat-compact`**.
+- Discovery and shell integration: **`models`**, **`version`**,
+  **`completion`**, and **`help`**.
 
 Three global flags worth knowing: `--encoding` (`o200k_base` by
 default, `cl100k_base` available), `--format` (`text`, `json`, or
 `md`), and `--reference-window` (express the always-on tax as a
-percentage of a context window of your choice — opt-in).
+percentage of a context window of your choice — opt-in). `--credit-model`
+adds the input-only nano-AIU scenario.
 
 See [reference/cli-reference.md](reference/cli-reference.md) for the full reference.
 
@@ -63,10 +53,11 @@ Setting expectations matters at least as much as listing features.
   files that get sent to LLMs. If you want to instrument live
   traffic, that's a different tool — and the output of that tool
   is what you'd feed to `tokopt tail` for percentile analysis.
-- **Not a magic optimiser.** It does not rewrite your prompts. It
-  gives you measured numbers and ranked findings; you decide what
-  to change. Optimisation is a human decision; measurement is the
-  bedrock you make it on.
+- **Not an autonomous rewriter.** `slim` is dry-run by default.
+  Mutation requires explicit `--apply`, clean-tree/atomic-write checks, and
+  a second `--allow-format-change` intent before JSON/YAML can change media
+  type (normally to TOON).
+  You decide what to change.
 - **Not coupled to any single vendor.** tokopt uses
   [`tiktoken`][tt] (`o200k_base` by default) as a vendor-neutral
   approximation. The number won't be byte-perfect for non-OpenAI
@@ -123,11 +114,14 @@ that ended up in Layer 1 by accident.
 
 ## How it fits a Copilot toolchain
 
-tokopt is the **measurement layer**. The *guide* (sixteen chapters
-of conceptual background), the *skills* (five short Copilot Chat
-skills that wrap the CLI), and the *agent* (`@token-doctor`, which
-orchestrates them) live in the source repo:
-<https://github.com/shinyay/getting-started-with-token-optimization>.
+tokopt is the local **measurement and deterministic transformation layer**.
+The *guide* (sixteen chapters of conceptual background), the canonical
+Copilot CLI plugin (**10 skills + 2 agents**), and the VS Code companion live
+across the source and sibling repositories:
+
+- Guide + Go source: <https://github.com/shinyay/getting-started-with-token-optimization>
+- Copilot CLI plugin: <https://github.com/shinyay/tokopt-skills>
+- VS Code companion: <https://github.com/shinyay/tokopt-vscode>
 
 If you only want the binary and the docs that ship with it, you're
 in the right place. If you want the conceptual material or the

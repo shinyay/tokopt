@@ -15,8 +15,9 @@ to one of these surfaces:
   (`--credit-model`, `--format`, …).
 - **`--format json` output schemas** — keyed by the embedded
   `format_version` field (see [Wire contracts](#wire-contracts-format_version)).
-- **Exit codes**: `0` ok, `1` runtime error, `2` budget exceeded
-  (`report --threshold`).
+- **Exit codes**: `0` success, `1` validation/runtime failure, `2`
+  policy or safety refusal (`report --threshold`, destructive slim/chat
+  safeguards, or corrupted Rewind content).
 - **The embedded rate-card schema** (`rate-card.json`, its own
   `format_version`).
 
@@ -53,7 +54,7 @@ wire format across many product releases:
 
 | Contract | Field | Current |
 |---|---|---|
-| `count` / `audit` / `anatomy` / `models` JSON | `format_version` | `"v1"` |
+| Versioned CLI `--format=json` payloads | `format_version` | `"v1"`; see the [canonical schema and exception list](https://github.com/shinyay/getting-started-with-token-optimization/blob/main/tools/tokopt/docs/cli-json-schema.md) |
 | Embedded & external rate card | `format_version` | `1` |
 
 Rules:
@@ -74,10 +75,13 @@ public API without a MAJOR bump. Checklist:
 
 - [ ] A second real user / team depends on it, **or** we publish broadly
       (e.g. VS Code Marketplace listing, public announcement).
+- [ ] Critical data-integrity and recovery defects are closed.
 - [ ] The command/flag set and JSON `format_version=v1` schemas are ones we
-      are willing to freeze.
-- [ ] The rate-card schema is frozen.
-- [ ] Docs and verification are complete.
+      are willing to freeze, and every consumer uses the machine contract
+      rather than parsing human output.
+- [ ] Default semantic transforms satisfy an approved quality baseline.
+- [ ] Rate cards, compatibility data, and docs are current and provenance
+      metadata is verifiable from public source tag to released artifact.
 
 Until then we stay in `0.x` and keep breaking changes cheap.
 

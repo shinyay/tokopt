@@ -85,7 +85,16 @@ tokopt detect: no anti-patterns found
 
 ### `--format json`
 
-A JSON array of `Finding` objects:
+A versioned object containing a `findings` array:
+
+```json
+{
+  "format_version": "v1",
+  "findings": []
+}
+```
+
+Each `findings` entry has these fields:
 
 | Field              | Type   | Description                                              |
 |--------------------|--------|----------------------------------------------------------|
@@ -125,13 +134,13 @@ tokopt detect
 Run against a specific subdirectory and show JSON:
 
 ```bash
-tokopt detect ./examples/github-workflows --format json | jq '.[].id'
+tokopt detect ./examples/github-workflows --format json | jq '.findings[].id'
 ```
 
 Filter to high-severity findings only:
 
 ```bash
-tokopt detect --format json | jq '.[] | select(.severity == "high" or .severity == "critical")'
+tokopt detect --format json | jq '.findings[] | select(.severity == "high" or .severity == "critical")'
 ```
 
 Markdown for a PR comment:

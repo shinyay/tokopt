@@ -23,7 +23,7 @@ shows up. You want CI to refuse the merge instead.
 ## What you'll need
 
 - A GitHub repository with Actions enabled.
-- `tokopt` v0.1.0 or later (the workflow installs it for you).
+- `tokopt` v0.18.0 (the workflow installs the pinned release for you).
 - A baseline measurement (one run of `tokopt audit .` on `main`).
 - Five minutes.
 
@@ -90,7 +90,7 @@ reproducible:
 - name: Install tokopt
   run: |
     curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \
-      | sh -s -- --version v0.1.0
+      | sh -s -- --version v0.18.0
     echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 ```
 

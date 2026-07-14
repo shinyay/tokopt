@@ -15,17 +15,12 @@ repository — system prompts, agents, skills, `AGENTS.md`,
 `copilot-instructions.md` — and surfaces the anti-patterns that quietly
 inflate them. See [what-is-tokopt.md](what-is-tokopt.md) for the long form.
 
-### Q: Why isn't the source code public?
+### Q: Where is the source code?
 
-For v0.1.0, tokopt ships as a binary-only release. The focus is on
-**stability**, **education**, and **demonstrable measurement** rather than
-on running an open-source project on day one. The companion source repo at
-[shinyay/getting-started-with-token-optimization](https://github.com/shinyay/getting-started-with-token-optimization)
-holds the worked examples, the integrations, and the editorial material the
-tool is built to support. Opening the binary repo is on the
-[roadmap](roadmap.md#long-term--open-questions) — it depends on whether
-community engagement justifies the maintenance overhead of running it as a
-public Go project.
+The Go source is public in
+[shinyay/getting-started-with-token-optimization](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt).
+This repository is the binary distribution endpoint: releases, checksums,
+installer, and distribution-focused docs.
 
 ### Q: Is tokopt free to use?
 
@@ -46,10 +41,12 @@ predictable, measurable waste. The full story is in
 
 It depends on the model family.
 
-- **OpenAI families using `o200k_base` or `cl100k_base`** — the count *is*
-  the billing oracle. tokopt uses
-  [`tiktoken-go`](https://github.com/pkoukk/tiktoken-go), the same BPE
-  tables OpenAI uses to bill you.
+- **OpenAI families using `o200k_base` or `cl100k_base`** — the local count
+  closely follows that tokenizer, but provider-side wrappers, caching,
+  output/reasoning tokens, and billing policy remain outside this static
+  measurement. tokopt uses
+  [`tiktoken-go`](https://github.com/pkoukk/tiktoken-go) with the public BPE
+  tables for those encodings.
 - **Other vendors (Claude, Gemini, Llama, Mistral)** — the count is a
   **directional approximation**. Typical drift is ~5–15% on
   English-heavy content; up to 30% on heavily multilingual text. Use

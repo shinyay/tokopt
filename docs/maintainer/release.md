@@ -13,7 +13,7 @@ assumed.
 
 ## Prerequisites
 
-- **Go 1.22+** on the build machine (`go version`).
+- **Go 1.24+** on the build machine (`go version`).
 - **`gh` CLI** authenticated against the binary repo
   (`gh auth status` — must show `shinyay/tokopt` access with `repo` and
   `write:packages` scopes; `gh auth refresh -s repo` if missing).
@@ -59,11 +59,17 @@ cd <source-repo>
 git checkout main
 git pull --ff-only
 
-# Tests must be green.
+# The Go module lives under tools/tokopt.
+cd tools/tokopt
+
+# Release gates must be green.
 go test ./...
+go test -race -count=1 ./...
+go test -race -count=1 -tags nexusja ./...
+go vet ./...
 
 # Verify the version-flag wiring still exists.
-grep -n 'var version' tools/tokopt/cmd/tokopt/main.go
+grep -n 'var version' cmd/tokopt/main.go
 # Expected: var version = "dev"
 ```
 
@@ -418,23 +424,13 @@ If a release is broken in the wild:
 1. **Mark it broken first**: edit the GitHub release notes to add a
    `> ⚠️ DO NOT USE — see vX.Y.(Z+1)` banner at the top. This is visible
    immediately and reaches users who already bookmarked the release URL.
-2. Delete the release **and** the tag from both sides:
-
-   ```bash
-   # Binary repo
-   gh release delete "v${VERSION}" --repo shinyay/tokopt --yes
-   git push --delete origin "v${VERSION}"
-   git tag -d "v${VERSION}"
-
-   # Source repo
-   git push --delete origin "v${VERSION}"
-   git tag -d "v${VERSION}"
-   ```
-
-   `gh release delete` does **not** delete the underlying git tag — both
-   commands above are necessary.
-
-3. Bump to `vX.Y.(Z+1)` and re-release with the fix. Never re-use a tag.
+2. **Preserve both source and binary tags.** Do not delete or move a public
+   tag: users, checksums, and provenance links may already depend on it.
+   Mark the binary release as withdrawn in its title/body and keep the assets
+   available for forensic comparison unless a security incident requires
+   removal.
+3. Bump to `vX.Y.(Z+1)` and re-release with the fix. Link the withdrawn
+   release to the replacement patch and never re-use a tag.
 
 If users may have already installed the broken release: open an issue
 using the `bug_report.yml` template format pinned to the top of the repo,

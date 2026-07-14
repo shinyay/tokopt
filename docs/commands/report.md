@@ -86,11 +86,12 @@ quality findings (heuristic — impact not measurable from static config):
   ...
 ```
 
-If `--threshold` was exceeded, an additional line is written **to stderr**
+If `--threshold` was exceeded, diagnostics are written **to stderr**
 (stdout still contains the full report):
 
 ```text
 tokopt: always-on tax <N> exceeds threshold <T>
+error: tokopt: always-on token budget exceeded
 ```
 
 ### `--format json`
@@ -99,10 +100,18 @@ Top-level object:
 
 | Field              | Type   | Description                                                       |
 |--------------------|--------|-------------------------------------------------------------------|
+| `format_version`   | string | Machine contract version; currently `"v1"`.                       |
 | `audit`            | object | Full audit result (see [`audit --format json`](audit.md#--format-json)). |
 | `findings`         | array  | Full anti-pattern findings (see [`detect --format json`](detect.md#--format-json)). |
 | `recommendations`  | array  | Measured recommendations sorted by `est_tokens_saved` desc.        |
 | `quality_findings` | array  | Heuristic recommendations (`est_tokens_saved == 0`); omitted when empty. |
+| `status`           | string | `"budget_exceeded"` when `--threshold` is exceeded; otherwise omitted. |
+| `details`          | object | Threshold, observed always-on total, and excess tokens; emitted with `status`. |
+
+An exceeded JSON threshold still writes exactly **one complete report
+document** to stdout, then exits `2`. The budget outcome is carried by
+`status` / `details`; diagnostics remain on stderr rather than appending a
+second JSON error object.
 
 Each `recommendations[]` / `quality_findings[]` entry:
 

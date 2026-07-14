@@ -11,9 +11,9 @@ between releases, but the meaning of each code is part of the public
 contract:
 
 - `0` — the tool ran and the result is acceptable.
-- `1` — the tool itself failed to run cleanly (an *operational* error).
-- `2` — the tool ran successfully but **policy** is violated (the
-  always-on token budget has been exceeded).
+- `1` — validation failed or the tool could not complete an operation.
+- `2` — a **policy or safety boundary** refused the requested outcome,
+  such as an exceeded budget, unsafe file mutation, or corrupted Rewind data.
 
 Keep `1` and `2` separate in CI: `1` should usually retry or alert an
 on-call human; `2` should fail the build and ping the author.
@@ -23,8 +23,8 @@ on-call human; `2` should fail the build and ping the author.
 | Code | Meaning                | Triggered by |
 |-----:|------------------------|--------------|
 | `0`  | Success                | Normal completion. Includes "no findings" and "findings present but no gate set". |
-| `1`  | Runtime error          | I/O failures (file not found, unreadable), parse errors (malformed YAML/JSON/JSONL/CSV), invalid flag values (unknown `--encoding` or `--format`), missing required flags (e.g. `tail --input`). Message printed to stderr with `error:` prefix. |
-| `2`  | Budget exceeded        | **Only** `tokopt report --threshold N` when `always_on_total > N` (strict greater-than; equality passes). Message printed to stderr; the report still renders to stdout first. |
+| `1`  | Validation/runtime failure | I/O failures, parse errors, invalid flag values, and missing required arguments. Message printed to stderr with `error:` prefix. |
+| `2`  | Policy/safety refusal  | Budget exceeded, unsafe destructive apply, unavailable TTY for confirmation, detected file race/symlink, or corrupted Rewind content. |
 
 ## Per-command exit-code matrix
 
@@ -34,8 +34,13 @@ on-call human; `2` should fail the build and ping the author.
 | `anatomy` | ✅  | ✅  | ❌  | `1` covers unknown keys in `--json`, missing files, parse errors. |
 | `count`   | ✅  | ✅  | ❌  | The smallest primitive — never gates. |
 | `detect`  | ✅  | ✅  | ❌  | **Always exits `0` on success, regardless of severity** — including `critical` findings. Detection is informational. Gate with `report --threshold` instead. |
-| `report`  | ✅  | ✅  | ✅  | The only command that emits `2`, and only when `--threshold > 0`. |
+| `report`  | ✅  | ✅  | ✅  | `2` when `--threshold > 0` and the always-on total exceeds it. |
 | `tail`    | ✅  | ✅  | ❌  | `1` covers missing `--input`, missing column, malformed records. |
+| `slim`    | ✅  | ✅  | ✅  | `2` for destructive-flow safety refusals, including JSON/YAML apply without `--allow-format-change`; dry-run and user-declined confirmation return `0`. |
+| `rewind`  | ✅  | ✅  | ✅  | `2` for integrity corruption; invalid hashes, missing stores/blobs, and other runtime failures return `1`. |
+| `chat-compact` | ✅ | ✅ | ✅ | Apply mode reuses the slim mutation safety ladder. |
+| `models`  | ✅  | ✅  | ❌  | Malformed external rate cards return `1`. |
+| `version` / `completion` / `help` | ✅ | ✅ | ❌ | Invalid usage or output failures return `1`. |
 
 > [!IMPORTANT]
 > `tokopt detect` will not break your build even on `critical` findings.
