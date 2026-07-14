@@ -17,6 +17,34 @@ under each release's _Source release notes_ section.
 
 <!-- empty -->
 
+## [0.18.0] — 2026-07-14
+
+> **Trust Restoration release.** No distribution-surface changes — same
+> 5-platform matrix (linux/darwin amd64+arm64, windows amd64), same
+> `scripts/install.sh`, and same `SHA256SUMS` format. This binary release
+> packages **tokopt v0.18.0** from the source repo.
+>
+> Source-side highlights:
+>
+> - **Required Rewind is fatal end to end.** `--require-rewind` now stops the
+>   affected file before downstream stages, transformed stdout, or apply;
+>   batch mode records the file error and continues later files.
+> - **Structured JSON/YAML conversion fails closed.** Duplicate keys,
+>   malformed Unicode, unsupported tags/keys, unsafe numeric normalization,
+>   excessive nesting, and alias amplification preserve the original input
+>   with stable diagnostics.
+> - **Format-changing apply requires explicit authorization.** JSON/YAML
+>   media-type changes require `--apply --allow-format-change`; `--force`
+>   cannot bypass the gate.
+> - **Rewind storage is hardened.** Private Unix modes, SHA-256 verification,
+>   pinned-root traversal, symlink/non-regular-file rejection, and
+>   atomic no-replace publication protect recovery artifacts. Unsupported
+>   secure-publication platforms fail explicitly.
+> - **Machine-readable failure paths own one JSON response.** Threshold and
+>   safety refusals no longer append a second error document.
+>
+> Full source notes: [v0.18.0 source release](https://github.com/shinyay/getting-started-with-token-optimization/releases/tag/v0.18.0).
+
 ## [0.17.0] — 2026-07-07
 
 > **Lossy YAML + SemanticDedup naming release.** No distribution-surface
@@ -968,7 +996,8 @@ Full source-repo release notes:
   schemas. See [docs/maintainer/release.md](docs/maintainer/release.md#versioning-policy-semver)
   for the full policy.
 
-[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/shinyay/tokopt/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/shinyay/tokopt/releases/tag/v0.18.0
 [0.17.0]: https://github.com/shinyay/tokopt/releases/tag/v0.17.0
 [0.16.0]: https://github.com/shinyay/tokopt/releases/tag/v0.16.0
 [0.15.0]: https://github.com/shinyay/tokopt/releases/tag/v0.15.0

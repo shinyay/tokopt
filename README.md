@@ -10,9 +10,12 @@
 `tokopt` is a small Go CLI that **measures** the token cost of a Copilot/agent
 repository and reports it honestly. It scans your real configuration, decomposes
 real prompts into their seven canonical segments, runs anti-pattern detectors
-against real files, and analyses usage logs for the heavy tail. Output is in
-**tokens** — never dollars — because pricing changes too fast and the honest
-unit for design is the token.
+against real files, and analyses usage logs for the heavy tail. The primary
+measurement is **tokens**. Optional AI Credit projection is an input-only
+scenario in nano-AIU, not an invoice estimate: cached input, cache writes,
+output, reasoning, and long-context tiers are not separately modelled. The
+embedded v1 card is a dated snapshot verified **2026-06-06**, not a live
+catalog; inspect `tokopt models --format json` for its `measured_at` value.
 
 It is built for engineers and platform teams who own a Copilot/agent template
 repo and want a number, not an opinion. Every finding is labelled **measured**
@@ -21,7 +24,7 @@ which came from pattern-matching. You can reach the same audit in three ways:
 from the integrated **terminal**, from one-click VS Code Tasks
 ([`tokopt-vscode`](https://github.com/shinyay/tokopt-vscode) — VS Code Copilot
 Chat extension with 5 surfaces), or from natural-language Copilot Chat via
-the companion **9 skills + 2 agents** distributed as
+the companion **10 skills + 2 agents** distributed as
 [`tokopt-skills`](https://github.com/shinyay/tokopt-skills) (Copilot CLI plugin).
 Pick whichever surface fits the moment — they all call the same binary.
 
@@ -42,7 +45,7 @@ sh -c 'curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/
 **Pin to a specific version:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh -s -- --version v0.1.0
+curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh | sh -s -- --version v0.18.0
 ```
 
 The installer detects your OS/architecture, downloads the matching binary from
@@ -95,8 +98,8 @@ tokenizer is local (`tiktoken-go`, `o200k_base` by default).
 
 ## 📦 What's in the box
 
-Seven commands cover the audit → diagnose → recommend loop. Each links to its
-own reference doc.
+Thirteen root commands cover measurement, diagnosis, deterministic compression,
+recovery, and shell integration.
 
 | Command | Purpose | Doc |
 | --- | --- | --- |
@@ -107,11 +110,18 @@ own reference doc.
 | `report` | Combined audit + detect dashboard with ranked recommendations. CI-friendly via `--threshold`. | [docs/commands/report.md](docs/commands/report.md) |
 | `count` | Token count for any file. Use `-` for stdin. | [docs/commands/count.md](docs/commands/count.md) |
 | `models` | List the models the rate card can project cost for (name + `basis`). | [docs/commands/models.md](docs/commands/models.md) |
+| `slim` | Preview or safely apply deterministic prompt/content compression. | [source CLI reference](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt) |
+| `rewind` | Retrieve, verify, list, and clean recoverable slim artifacts. | [source CLI reference](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt) |
+| `chat-compact` | Compact JSONL chat transcripts with explicit retention and truncation controls. | [source CLI reference](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt) |
+| `version` | Print version, source commit, and build capabilities. | [source CLI reference](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt) |
+| `completion` | Generate completion scripts for bash, zsh, fish, or PowerShell. | [Shell completions](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt#shell-completions) |
+| `help` | Show root or command-specific help. | [CLI reference](docs/reference/cli-reference.md) |
 
 Global flags: `--encoding {o200k_base,cl100k_base}`, `--format {text,json,md}`,
 `--reference-window N` (opt-in only — no default model size is implied). The
 optional `--credit-model <name>` projects token counts into **AI Credit
-(nano-AIU)** — never dollars — using the embedded rate card; run
+(nano-AIU)** using the embedded rate card. This is an input-only comparative
+scenario, not invoice reconciliation; run
 `tokopt models` for the list, and see
 [the source repo's AIU & rate cards page](https://github.com/shinyay/getting-started-with-token-optimization/blob/main/website/docs/foundations/aiu-and-rate-cards.en.md)
 for methodology. See
@@ -123,7 +133,7 @@ for methodology. See
 | --- | --- | --- |
 | **1 · Terminal** | `tokopt` on your shell | Scripted runs, CI gates, ad-hoc audits — see [docs/quickstart.md](docs/quickstart.md). |
 | **2 · VS Code Tasks / Copilot Chat** | One-click runs + CodeLens + Diagnostics + 4 slash prompts | Repeated audits during a refactor — install the [`tokopt-vscode`](https://github.com/shinyay/tokopt-vscode) extension (5 surfaces: CodeLens / Diagnostics / Quick Fix / Status bar / TreeView), or copy task snippets from [docs/integrations/vscode-tasks.md](docs/integrations/vscode-tasks.md). |
-| **3 · Copilot CLI Chat** | `@token-doctor` + `@prompt-optimizer` agents + 9 skills | Natural-language audits ("why is my always-on tax so high?") — install the [`tokopt-skills`](https://github.com/shinyay/tokopt-skills) plugin via `copilot plugin install shinyay/tokopt-skills`, or see [docs/integrations/copilot-skills-and-agent.md](docs/integrations/copilot-skills-and-agent.md). |
+| **3 · Copilot CLI Chat** | `@token-doctor` + `@prompt-optimizer` agents + 10 skills | Natural-language audits ("why is my always-on tax so high?") — install the [`tokopt-skills`](https://github.com/shinyay/tokopt-skills) plugin via `copilot plugin install shinyay/tokopt-skills`, or see [docs/integrations/copilot-skills-and-agent.md](docs/integrations/copilot-skills-and-agent.md). |
 
 All three call the same binary and produce the same numbers. The skills + agent
 just translate the output into prose and refuse to invent counts the CLI did
@@ -164,7 +174,7 @@ hub linking every doc below.
 
 - [docs/commands/](docs/commands/) — one page per command: `audit`, `anatomy`, `detect`, `tail`, `report`, `count`, `models`.
 - [docs/reference/cli-reference.md](docs/reference/cli-reference.md) — `--encoding`, `--format`, `--reference-window`, full flag matrix.
-- [docs/reference/exit-codes.md](docs/reference/exit-codes.md) — `0` = ok, `1` = error, `2` = budget exceeded.
+- [docs/reference/exit-codes.md](docs/reference/exit-codes.md) — `0` = success, `1` = validation/runtime failure, `2` = policy or safety refusal.
 - [docs/reference/output-formats.md](docs/reference/output-formats.md) — `text`, `json`, `md` schemas.
 - [VERSIONING.md](VERSIONING.md) — SemVer policy, `format_version` wire contracts, road to 1.0.
 - [COMPATIBILITY.md](COMPATIBILITY.md) — canonical matrix: which CLI version each sibling (extension / skills) feature needs, plus release trains.
@@ -220,8 +230,11 @@ only be inferred from static config. Read the long version in
 
 ## 🔭 Roadmap
 
-`v0.1` ships the audit / anatomy / detect / tail / report / count loop;
-upcoming work is tracked in [docs/roadmap.md](docs/roadmap.md).
+The current CLI release is **v0.18.0**. Milestone 1 closed the trust gates for
+structured-data fidelity, Rewind integrity, format-changing apply, and
+one-document machine contracts. The next work focuses on deterministic quality
+evidence and typed contracts before billing expansion or new compression
+stages. See [docs/roadmap.md](docs/roadmap.md).
 
 ## 🧭 Related repositories — the `tokopt` family
 
@@ -231,17 +244,20 @@ purpose-built distributions wrap the same binary for Copilot Chat surfaces:
 
 | Repo | Role | Install / consume |
 |---|---|---|
-| **[`shinyay/getting-started-with-token-optimization`](https://github.com/shinyay/getting-started-with-token-optimization)** | 🎓 **Source of truth** — 16-chapter textbook + the `tokopt` Go source (`tools/tokopt/`) + canonical `.github/skills/` + `.github/agents/`. CI lives here too. | Read `docs/index.md`; contribute Go / skill / doc changes here. |
+| **[`shinyay/getting-started-with-token-optimization`](https://github.com/shinyay/getting-started-with-token-optimization)** | 🎓 **Go source of truth** — textbook + the `tokopt` Go source (`tools/tokopt/`) + repository dogfood copies of skills/agents. CI lives here too. | Read `docs/index.md`; contribute Go and source documentation changes here. |
 | **[`shinyay/tokopt`](https://github.com/shinyay/tokopt)** *(you are here)* | 📦 Pre-built binary releases for Linux / macOS / Windows + `install.sh`. No source. | `curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \| sh` |
-| **[`shinyay/tokopt-skills`](https://github.com/shinyay/tokopt-skills)** | 🧠 **Copilot CLI plugin** — 9 skills + 2 agents bundled for `gh copilot`. Surface: terminal Copilot Chat (`copilot`). | `copilot plugin install shinyay/tokopt-skills` |
-| **[`shinyay/tokopt-vscode`](https://github.com/shinyay/tokopt-vscode)** | 💻 **VS Code extension** — same 9 skills + 2 agents + 4 slash prompts (`/token-audit`, `/slim-suggest`, `/slim-apply`, `/prompt-anatomy`) + 5 surfaces (CodeLens / Diagnostics / Quick Fix / Status bar / TreeView). Consumes `format_version: "v1"` envelopes from this binary. | Marketplace `.vsix`; or `scripts/install-{workspace,user}.sh`. |
+| **[`shinyay/tokopt-skills`](https://github.com/shinyay/tokopt-skills)** | 🧠 **Copilot CLI plugin** — 10 skills + 2 agents bundled for Copilot CLI. | `copilot plugin install shinyay/tokopt-skills` |
+| **[`shinyay/tokopt-vscode`](https://github.com/shinyay/tokopt-vscode)** | 💻 **VS Code extension** — surface-specific skills/agents + 4 slash prompts + CodeLens, Diagnostics, Quick Fix, Status bar, TreeView, and Webview dashboards. Consumes `format_version: "v1"` envelopes from this binary. | Marketplace `.vsix`; or `scripts/install-{workspace,user}.sh`. |
 
 All three downstream consumers call the **same** `tokopt` binary, so any
 number you see in Copilot Chat (CLI or VS Code) is the same number you'd
 see in the terminal. Pick whichever surface fits the moment — they all
 report identical audit / anatomy / slim numbers, every time.
 
-> **Version compatibility (current stable triple)**: `tokopt` v0.4.0 + `tokopt-skills` v0.2.1 + `tokopt-vscode` v0.6.0 — all co-released 2026-05-30 against `getting-started` v0.4.0. The `format_version: "v1"` JSON envelope contract added in v0.4.0 is what lets `tokopt-vscode` v0.6.0's 5 surfaces fail closed on any future schema bump.
+> **Current releases**: `tokopt` v0.18.0, `tokopt-skills` v0.3.2, and
+> `tokopt-vscode` v0.16.1. They version independently; use
+> [COMPATIBILITY.md](COMPATIBILITY.md) for capability-level requirements and
+> graceful fallback behavior.
 
 ## License
 

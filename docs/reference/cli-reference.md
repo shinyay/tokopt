@@ -1,8 +1,10 @@
 # CLI reference
 
-Single-page consolidated reference for every `tokopt` command and flag.
-Use this for printing or scanning; the per-command docs in
-[`../commands/`](../commands/) are the long form.
+Single-page consolidated reference for the command inventory and the
+measurement/reporting flags. `tokopt <command> --help` is authoritative for
+the full current flag set; detailed source-side slim/Rewind documentation
+lives in the
+[Go module README](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt).
 
 ## Synopsis
 
@@ -10,9 +12,10 @@ Use this for printing or scanning; the per-command docs in
 tokopt <command> [flags] [args]
 ```
 
-`tokopt` reads files (or stdin), counts tokens, and emits a structured
-report. It never makes network calls and never reports dollars — only
-tokens and percentages of an optional reference window.
+`tokopt` reads files (or stdin), counts tokens, and emits structured results.
+The runtime makes no network calls. Its primary measurement is tokens;
+optional nano-AIU projection is an input-only comparison scenario, not a
+dollar amount or invoice estimate.
 
 ## Global flags
 
@@ -39,6 +42,12 @@ These flags are persistent — every subcommand accepts them.
 | `detect`  | Run anti-pattern detectors against a repo's static config       | [`detect.md`](../commands/detect.md) |
 | `report`  | Combined `audit` + `detect` dashboard with CI gate              | [`report.md`](../commands/report.md) |
 | `tail`    | Heavy-tail percentile analysis of a usage log (JSONL or CSV)    | [`tail.md`](../commands/tail.md) |
+| `slim` | Preview or safely apply deterministic compression; JSON/YAML replacement requires `--apply --allow-format-change` | [source CLI README](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt#tokopt-slim-phase-1-tier-1) |
+| `rewind` | Retrieve, verify, list, and clean recoverable slim artifacts | [source CLI README](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt) |
+| `chat-compact` | Compact JSONL transcripts with explicit retention/truncation controls | [source CLI README](https://github.com/shinyay/getting-started-with-token-optimization/tree/main/tools/tokopt) |
+| `version` | Print version, source commit, and build capabilities | `tokopt version --help` |
+| `completion` | Generate bash, zsh, fish, or PowerShell completion scripts | `tokopt completion --help` |
+| `help` | Show root or command-specific help | `tokopt help` |
 
 ---
 
@@ -230,7 +239,7 @@ See also: [`../commands/tail.md`](../commands/tail.md).
 |-----:|--------------------------------------------------------------------|--------------|
 | `0`  | Success. No findings, or findings present but no gate. Within budget. | All commands on the happy path. |
 | `1`  | Runtime error: file not found, parse error, unknown flag value, invalid `--encoding`, invalid `--format`, etc. | All commands. Message printed to stderr. |
-| `2`  | Budget exceeded. Always-on tax `>` `--threshold`. | **Only** `tokopt report --threshold N` (strict `>`). |
+| `2`  | Policy or safety refusal. | `report --threshold`, destructive slim/chat safeguards, or corrupted Rewind content. |
 
 The `1` vs `2` split matters in CI: `2` is a **policy** failure (your
 config grew past the budget), `1` is an **operational** failure (the

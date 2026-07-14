@@ -41,7 +41,7 @@ conceptual questions see [faq.md](faq.md); for the exit-code contract see
 
 ### Symptom: `install.sh` says "Unsupported OS" or "Unsupported architecture"
 
-- **Diagnosis:** v0.1.0 ships **5 platform combinations**:
+- **Diagnosis:** v0.18.0 ships **5 platform combinations**:
   `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`,
   `windows/amd64`. Your `uname -s` / `uname -m` doesn't match any of
   them. See the table in
@@ -56,8 +56,8 @@ conceptual questions see [faq.md](faq.md); for the exit-code contract see
 
 ### Symptom: macOS Gatekeeper blocks the binary ("cannot be opened because the developer cannot be verified")
 
-- **Diagnosis:** the macOS binaries shipped with v0.1.0 are unsigned.
-  We don't have an Apple Developer ID for v0.1.0.
+- **Diagnosis:** the macOS binaries shipped with v0.18.0 are unsigned.
+  We do not yet ship Apple Developer ID signing.
 - **Fix (one-liner):**
 
   ```bash
@@ -76,8 +76,8 @@ conceptual questions see [faq.md](faq.md); for the exit-code contract see
   signal. Defender doesn't recognise the publisher.
 - **Fix:** add the binary's directory to Defender's exclusion list, or
   build from source if your environment forbids unsigned binaries.
-- **Root cause:** same as macOS Gatekeeper — Authenticode signing is on
-  the roadmap, not shipped in v0.1.0.
+- **Root cause:** same as macOS Gatekeeper — Authenticode signing is not
+  shipped in v0.18.0.
 
 ---
 
@@ -173,7 +173,7 @@ conceptual questions see [faq.md](faq.md); for the exit-code contract see
 
   ```bash
   curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \
-    | sh -s -- --version v0.1.0
+    | sh -s -- --version v0.18.0
   ```
 
 - **Root cause:** `latest`-resolution is convenient for humans, hostile
@@ -193,7 +193,7 @@ conceptual questions see [faq.md](faq.md); for the exit-code contract see
   - Re-baseline the threshold: run `tokopt audit . --format json | jq
     .always_on_total` and bump `--threshold` to a deliberate new value.
   - Pin `--encoding` explicitly in CI (don't rely on the default).
-  - Pin the tokopt version in CI (`install.sh --version v0.1.0`) so
+  - Pin the tokopt version in CI (`install.sh --version v0.18.0`) so
     upgrades are deliberate.
   - Commit the new threshold as a reviewed change with a one-line note
     explaining what moved.

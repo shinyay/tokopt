@@ -48,7 +48,7 @@ jobs:
         # Pin to a tagged release so the gate is reproducible.
         run: |
           curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \
-            | sh -s -- --version v0.1.0
+            | sh -s -- --version v0.18.0
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
         
       - name: Audit always-on token cost
@@ -174,7 +174,8 @@ For tighter gating across other layers, parse the JSON form yourself:
 
 ## Step 4: Pin the tokopt version
 
-The example installs with `--version v0.1.0` — keep it that way.
+The example installs with `--version v0.18.0` — keep the version pinned and
+update it deliberately after reviewing release notes.
 Tracking `HEAD` in CI means a tokopt release can change your gate's
 verdict overnight without a corresponding PR.
 
@@ -216,7 +217,7 @@ runs is rarely worth the complexity. If you really want to:
       - uses: actions/cache@v4
         with:
           path: ~/.local/bin/tokopt
-          key: tokopt-v0.1.0-${{ runner.os }}
+          key: tokopt-v0.18.0-${{ runner.os }}
 ```
 
 Skip the install step when the cache hits.

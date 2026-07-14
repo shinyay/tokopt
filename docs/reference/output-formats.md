@@ -1,8 +1,10 @@
 # Output formats
 
-Every `tokopt` command writes to stdout in one of three formats,
-selected by the persistent `--format` flag. This page documents the
-full payload schema each command emits.
+Most `tokopt` commands select presentation with the persistent `--format`
+flag. Raw Rewind content, JSONL transcript streams, shell completion, version,
+and help have command-specific contracts. The authoritative command matrix,
+wire shapes, and audited exceptions live in the source repo's
+[CLI JSON schema](https://github.com/shinyay/getting-started-with-token-optimization/blob/main/tools/tokopt/docs/cli-json-schema.md).
 
 ## The three formats
 
@@ -43,13 +45,15 @@ Default (no flag): `text`.
 
 ## Per-command output schemas
 
-All JSON output is pretty-printed with 2-space indentation. Field names
-are stable within a minor version (see *Stable vs unstable fields* below).
+Versioned JSON documents carry `"format_version": "v1"`. Most are
+pretty-printed with 2-space indentation; compact primitives and legacy Rewind
+success payloads are documented as exceptions in the canonical schema.
 
 ### `tokopt audit --format json`
 
 ```json
 {
+  "format_version": "v1",
   "root": "string",
   "encoding": "o200k_base",
   "files": [
@@ -79,6 +83,7 @@ are stable within a minor version (see *Stable vs unstable fields* below).
 
 ```json
 {
+  "format_version": "v1",
   "encoding": "o200k_base",
   "segments": [
     {
@@ -123,33 +128,37 @@ rejected with exit code `1`. All values must be strings (paths). Use
 
 ### `tokopt detect --format json`
 
-A JSON **array** of finding objects (top-level array, not wrapped):
+A versioned object whose `findings` field contains the finding array:
 
 ```json
-[
-  {
-    "id": "string",
-    "title": "string",
-    "severity": "info | warn | high | critical",
-    "confidence": "low | medium | high",
-    "location": "string (optional)",
-    "evidence": "string (optional)",
-    "recommendation": "string",
-    "est_tokens_saved": 0,
-    "estimate_basis": "string (optional)",
-    "chapter_ref": "string (optional)"
-  }
-]
+{
+  "format_version": "v1",
+  "findings": [
+    {
+      "id": "string",
+      "title": "string",
+      "severity": "info | warn | high | critical",
+      "confidence": "measured | heuristic",
+      "location": "string (optional)",
+      "evidence": "string (optional)",
+      "recommendation": "string",
+      "est_tokens_saved": 0,
+      "estimate_basis": "string (optional)",
+      "chapter_ref": "string (optional)"
+    }
+  ]
+}
 ```
 
-When no findings are present, the array is `null` or `[]` (consumers
-should accept either). `est_tokens_saved == 0` means the finding is a
-quality heuristic; impact isn't measurable from static config.
+When no findings are present, `findings` is `null` or `[]` (consumers should
+accept either). `est_tokens_saved == 0` means the finding is a quality
+heuristic; impact isn't measurable from static config.
 
 ### `tokopt tail --format json`
 
 ```json
 {
+  "format_version": "v1",
   "source": "string",
   "format": "jsonl | csv",
   "column": "tokens",
@@ -182,6 +191,7 @@ findings + ranked recommendations:
 
 ```json
 {
+  "format_version": "v1",
   "audit":    { "...": "see audit schema above" },
   "findings": [ { "...": "see detect schema above" } ],
   "recommendations": [
@@ -210,10 +220,86 @@ sorted descending by estimated savings. `quality_findings` (omitted
 when empty) holds heuristic findings whose impact is not measurable
 from static config.
 
+When `--threshold` is exceeded, the same single document also includes:
+
+```json
+{
+  "status": "budget_exceeded",
+  "details": {
+    "threshold": 800,
+    "always_on_total": 950,
+    "excess_tokens": 150
+  }
+}
+```
+
+The process exits `2`; stdout ends after this report document and the
+human diagnostic is written to stderr.
+
+### `tokopt slim --format json`
+
+Single-file and batch slim results are versioned objects. Transformed content
+is intentionally omitted from JSON; use text/Markdown output for the body.
+When a destructive safety check refuses after the result has been computed,
+stdout still contains exactly one result document and the diagnostic goes to
+stderr. A JSON/YAML format-change refusal records:
+
+```json
+{
+  "format_version": "v1",
+  "apply": {
+    "wrote": false,
+    "reason": "format-change-not-allowed"
+  }
+}
+```
+
+The process exits `2`. Add `--allow-format-change` only when replacing
+JSON/YAML with another media type is intentional (normally TOON; YAML
+Ionizer output can remain JSON if TonForm skips). `--force` cannot bypass
+this gate.
+
+Safety-preserving structured skips may add:
+
+```json
+{
+  "diagnostics": [
+    {
+      "stage": "TonForm",
+      "code": "number_fidelity",
+      "message": "TonForm: ..."
+    }
+  ]
+}
+```
+
+Stable codes are `duplicate_key`, `number_fidelity`,
+`unsupported_structure`, and `invalid_structure`.
+
+### `tokopt rewind verify --format json`
+
+Single-hash and full-store verification emit one versioned object. A corrupted
+`--all` result remains the sole stdout document and exits `2`:
+
+```json
+{
+  "format_version": "v1",
+  "ok": false,
+  "verified": 3,
+  "corrupted": ["0123456789abcdef..."]
+}
+```
+
+### `tokopt chat-compact --format json`
+
+Read-only and apply modes emit one versioned summary object to stdout. If an
+apply safety check refuses, the same object records `apply.wrote: false` and a
+stable reason; stderr carries the diagnostic and the process exits non-zero.
+
 ### `tokopt count`
 
 ```json
-{ "path": "README.md", "encoding": "o200k_base", "tokens": 1284, "bytes": 5421 }
+{ "format_version": "v1", "path": "README.md", "encoding": "o200k_base", "tokens": 1284, "bytes": 5421 }
 ```
 
 Single-line, **not** pretty-printed (this is the only command that
@@ -262,11 +348,12 @@ gh pr comment "$PR_NUMBER" --body-file tokopt-report.md
 
 ## Stable vs unstable fields
 
-`tokopt` is at **v0.1.0**. JSON field names are not yet guaranteed
-stable across minor releases — they will be by **v1.0**. Until then:
+`tokopt` is currently at **v0.18.0**. Versioned JSON documents use
+`format_version: "v1"`; additive fields may appear without a format bump,
+while incompatible wire changes require a new format version. Until v1.0:
 
-- **Treat field names as best-effort.** New fields may appear; existing
-  fields are unlikely to disappear, but may be renamed before v1.0.
+- **Accept additive fields.** Consumers should ignore fields they do not
+  understand and fail closed on an unknown `format_version`.
 - **Pin the tokopt version in CI scripts.** Use a specific tag or
   release binary, not `latest`.
 - **Don't depend on text output structure.** Tables, ordering, and

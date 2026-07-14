@@ -7,21 +7,17 @@ influence the direction.
 
 ## Status
 
-**v0.1.0** is the first public release. It is stable enough for CI gating
-today — the [`report --threshold`](commands/report.md) contract and the
-[exit-code matrix](reference/exit-codes.md) are part of the public surface
-and won't change without a deprecation note. Output **schemas** (the
-shape of `--format json`) may still evolve through `v1.0`; pin the tokopt
-version in CI if you depend on field names.
+The current CLI release is **v0.18.0**. It supports repository audit,
+prompt anatomy, anti-pattern detection, heavy-tail analysis, reporting,
+deterministic slim/rewind workflows, chat compaction, model-rate discovery,
+version reporting, and shell completion. Output **schemas** may still evolve
+before `v1.0`; pin the tokopt version in CI if you depend on field names.
 
 ## The principle
 
-tokopt is **intentionally small**. It does six things:
-[audit](commands/audit.md), [anatomy](commands/anatomy.md),
-[detect](commands/detect.md), [tail](commands/tail.md),
-[report](commands/report.md), [count](commands/count.md). The roadmap
-reflects **depth** — better measurement, sharper detectors, more reliable
-distribution — over **breadth** (more commands, more surface area).
+tokopt is **intentionally focused**. The roadmap prioritizes **trust, quality
+evidence, machine contracts, billing truth, and reliable distribution** over
+adding more compression stages or product surface area.
 
 When in doubt, the question we ask is: *"does this make the existing
 measurement more honest, or does it just add features?"* If the answer
@@ -29,81 +25,57 @@ is the second one, it doesn't ship.
 
 ---
 
-## Near-term (next few minor releases)
+## Milestone 1 — Trust restoration
 
-- **Output schema stability.** Lock in the JSON schemas for `audit`,
-  `anatomy`, `detect`, `tail`, and `report` so they're safe to consume
-  from third-party tooling without pinning. Goal: no breaking JSON
-  changes between v1.0 and v2.0.
-- **More detectors.** The current
-  [10 detectors](commands/detect.md#detectors) cover the patterns we
-  saw in the wild repeatedly. Community feature requests will drive the
-  next batch — see [`use_case.yml`](https://github.com/shinyay/tokopt/issues/new/choose)
-  to suggest one.
-- **Better cross-platform coverage.**
-  - Code-signed macOS binary (resolves the Gatekeeper symptom in
-    [troubleshooting.md](troubleshooting.md#symptom-macos-gatekeeper-blocks-the-binary-cannot-be-opened-because-the-developer-cannot-be-verified)).
-  - Windows arm64 build (currently the missing cell in the
-    [platform matrix](installation.md#supported-platforms)).
-  - Authenticode signature on the Windows binary.
-- **Cache / perf improvements** for very large monorepos. Today the
-  scanner re-tokenizes everything on each run; for repos with thousands
-  of always-on files a content-hash cache becomes worthwhile.
-- **Optional `tokopt watch` mode** that re-runs `audit` on file change.
-  Targeted at the editing loop, not at CI.
+**Completed in v0.18.0.** No new compression stage landed before this gate
+closed.
 
----
+- Required Rewind failures are fatal for the affected file: non-zero exit, no
+  downstream stage, no transformed stdout, and no apply. Batch mode records
+  the file error and retains its existing best-effort continuation contract.
+- Unix Rewind blobs use private modes; get/verify and repeat writes check
+  integrity on every platform. Path traversal and symlink escape fail closed.
+- JSON/YAML duplicate keys, unsupported structures, and numeric values
+  that cannot survive TOON exactly remain unchanged with diagnostics.
+- Machine-readable invocations emit one JSON document, including budget
+  and slim safety refusals.
+- Replacing JSON/YAML source with another media type requires both `--apply` and
+  `--allow-format-change`; `--force` cannot bypass it.
+- Current versions, compatibility, release procedures, and safety
+  terminology remain synchronized across the family.
 
-## Medium-term
+## Milestone 2 — Quality and contract foundation
 
-These are likely-but-not-committed. They depend on demand and on whether
-they fit the principle above.
+- Add an explicit transformation-effect and reversibility model without
+  removing existing v1 fields.
+- Replace stringly internal context updates with typed deltas and stable
+  diagnostic codes.
+- Establish deterministic fidelity fixtures and paired downstream quality
+  evaluation before enabling any new semantic transform by default.
+- Publish a capability-driven machine protocol so consumers never parse
+  human output as an API.
+- Move the VS Code extension to one typed CLI adapter and eliminate
+  unexplained skill/agent drift through generated inventories.
 
-- **`tokopt diff <ref>`** — show the always-on tax delta between two git
-  refs. Useful for "this PR added 320 tokens to the always-on tax,
-  here's what" annotations.
-- **`tokopt budget show / set`** — manage `--threshold` values in a
-  config file rather than scattering them across CI yaml. Would
-  introduce the project's first config file (currently there is none).
-- **Cross-encoding comparison output** — run `audit` with both
-  `o200k_base` and `cl100k_base` and emit a single side-by-side report.
-  Useful for teams shipping to multiple model families.
-- **Plugin / detector SDK.** A way for users to write custom
-  anti-pattern detectors against their own house rules without forking
-  tokopt. Open question: do we ship this as a Go package, a separate
-  binary protocol, or a directory of declarative rule files?
+## Milestone 3 — Billing truth and trusted distribution
 
----
+- Model input, cached input, cache write, output, and long-context rate
+  dimensions with provenance and effective dates.
+- Separate raw tokens, hypothetical scenarios, actual logged credits, and
+  unknown measurement dimensions.
+- Add Claude Code repository assets without claiming visibility into
+  hidden or dynamically retrieved context.
+- Generate compatibility docs from a machine-readable manifest.
+- Release from protected source tags with checksums, SBOM, provenance, and
+  signatures; broken public releases are withdrawn and replaced, never
+  silently re-tagged.
 
-## Long-term / open questions
+## Deferred v2 candidates
 
-These are real maybes. Listed here for transparency, not as commitments.
-
-- **Source code release.** The tokopt binary repo is currently
-  closed-source. The companion source repo at
-  [shinyay/getting-started-with-token-optimization](https://github.com/shinyay/getting-started-with-token-optimization)
-  is fully open and contains the editorial material, the integrations,
-  and the worked examples the tool is built around. Whether to open the
-  binary repo too depends on whether community engagement justifies
-  running it as a public Go project — that's a real maintenance
-  commitment, not a checkbox. See [faq.md](faq.md#q-why-isnt-the-source-code-public).
-- **Homebrew formula / official package-manager presence** (apt, dnf,
-  scoop, winget). Today the only supported install path is
-  [`install.sh`](installation.md#install-via-the-script-recommended)
-  or manual download. Package-manager presence is mostly distribution
-  toil; we'll do it when there's demand and the binary is signed on the
-  relevant platforms.
-- **VS Code extension** that wraps tokopt natively. Currently the
-  IDE story is the
-  [Copilot Chat skills + `token-doctor` agent](integrations/copilot-skills-and-agent.md)
-  and the [VS Code Tasks integration](integrations/vscode-tasks.md). A
-  native extension would add a panel UI, but that's a significant scope
-  jump and would have to fight the "no UI" principle below.
-- **First-class non-OpenAI tokenizer support** for Claude, Gemini, and
-  Llama. Today their counts are
-  [directional approximations](reference/encodings.md#choosing-an-encoding).
-  Fixing this depends on whether each vendor ships a usable local
-  tokenizer that can be linked into a Go binary without CGo.
+Typed stage APIs, split transformation-policy flags, transactional byte-exact
+Rewind manifests, runtime feedback import, and a supported extension model
+remain design candidates. They do not start until the three milestones above
+and real-user demand justify their migration cost.
 
 ---
 
@@ -114,14 +86,13 @@ they are **out of scope by design**.
 
 - **A SaaS dashboard.** tokopt is local-first. If you need
   multi-tenant rollups or hosted alerting, use a commercial tool.
-- **A web UI.** CLI-first by design. The chat skills + the
-  `token-doctor` agent are the GUI story.
+- **A hosted web UI or control plane.** The CLI and local VS Code extension
+  remain the supported interactive surfaces.
 - **Telemetry of any kind.** No usage pings. No update check. No
   analytics. The binary makes zero outbound network calls. See
   [faq.md](faq.md#q-does-tokopt-phone-home--send-data-anywhere).
-- **Auto-fix mode.** tokopt will never edit your files for you.
-  Detectors flag; humans decide what to delete. The whole point of the
-  tool is that the cuts are deliberate.
+- **Unreviewed auto-fix.** `slim --apply` is explicit and safety-gated;
+  tokopt does not silently rewrite files or apply detector suggestions.
 
 ---
 

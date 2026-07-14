@@ -64,7 +64,7 @@ that archive, verifies its SHA-256, and installs the binary.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/shinyay/tokopt/main/scripts/install.sh \
-  | sh -s -- --version v0.1.0
+  | sh -s -- --version v0.18.0
 ```
 
 Use this in CI or any reproducible environment. Skip the GitHub API call
@@ -108,7 +108,7 @@ USAGE:
     install.sh [OPTIONS]
 
 OPTIONS:
-    --version <VERSION>    Install a specific release tag (e.g. v0.1.0).
+    --version <VERSION>    Install a specific release tag (e.g. v0.18.0).
                            Overrides TOKOPT_VERSION env var.
     --prefix <DIR>         Install into <DIR>/bin (e.g. --prefix $HOME/.local).
                            Overrides INSTALL_DIR env var.
@@ -150,9 +150,9 @@ just with each step in your hands.
 2. Download the archive that matches your OS/arch — for example:
 
    ```text
-   tokopt-v0.1.0-linux-amd64.tar.gz
-   tokopt-v0.1.0-darwin-arm64.tar.gz
-   tokopt-v0.1.0-windows-amd64.zip
+   tokopt-v0.18.0-linux-amd64.tar.gz
+   tokopt-v0.18.0-darwin-arm64.tar.gz
+   tokopt-v0.18.0-windows-amd64.zip
    ```
 
 3. Download `SHA256SUMS` from the same release.
